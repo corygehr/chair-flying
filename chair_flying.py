@@ -249,10 +249,15 @@ class ChairFlying:
                         print("\nEnding practice session. Good work!")
                         return  # Exit both loops
                     elif response == 'n':
-                        # Select a random phase
+                        # Select a random phase (only reachable if maneuver has phases)
                         current_phase = self.select_phase(maneuver)
-                        print(f"\n→ Proceeding to next phase...")
-                        continue  # Show the phase
+                        if current_phase:
+                            print(f"\n→ Proceeding to next phase...")
+                            continue  # Show the phase
+                        else:
+                            # This should never happen if has_phases check is working correctly
+                            print("Error: No phases available. Proceeding to next maneuver.")
+                            break
                     elif response == 'c':
                         self.tracker.record_maneuver(maneuver, "completed", current_phase)
                         print("✓ Marked as completed")
