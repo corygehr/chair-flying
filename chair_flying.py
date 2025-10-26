@@ -72,10 +72,16 @@ class ChairFlying:
             config = json.load(f)
         
         # Validate configuration
-        required_keys = ["maneuvers", "interval_min", "interval_max"]
-        for key in required_keys:
-            if key not in config:
-                raise ValueError(f"Configuration missing required key: {key}")
+        if "maneuvers" not in config:
+            raise ValueError("Configuration missing required key: maneuvers")
+        
+        if not config["maneuvers"]:
+            raise ValueError("Configuration must contain at least one maneuver")
+        
+        # Validate interval configuration if provided
+        if "interval_min" in config and "interval_max" in config:
+            if config["interval_min"] > config["interval_max"]:
+                raise ValueError("interval_min must be less than or equal to interval_max")
         
         return config
     
@@ -123,7 +129,9 @@ class ChairFlying:
         print("Chair Flying - Aviation Training Practice")
         print("=" * 60)
         print(f"\nLoaded {len(self.config['maneuvers'])} maneuvers")
-        print(f"Interval: {self.config['interval_min']}-{self.config['interval_max']} seconds")
+        min_interval = self.config.get("interval_min", 30)
+        max_interval = self.config.get("interval_max", 120)
+        print(f"Interval: {min_interval}-{max_interval} seconds")
         print("\nStarting practice session...")
         print("Press Ctrl+C to stop at any time.\n")
         
