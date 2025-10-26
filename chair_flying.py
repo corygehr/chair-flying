@@ -165,6 +165,31 @@ class ChairFlying:
             else:
                 print("Invalid input. Please choose c, f, s, or q.")
     
+    def wait_with_countdown(self, interval: int):
+        """Wait for the specified interval with a countdown or progress indicator."""
+        show_countdown = self.config.get("show_next_maneuver_time", True)
+        
+        if show_countdown:
+            # Show countdown timer
+            import sys
+            for remaining in range(interval, 0, -1):
+                sys.stdout.write(f"\rNext maneuver in {remaining} seconds...  ")
+                sys.stdout.flush()
+                time.sleep(1)
+            sys.stdout.write("\r" + " " * 50 + "\r")  # Clear the line
+            sys.stdout.flush()
+        else:
+            # Show progress indicator (dots) without countdown
+            import sys
+            sys.stdout.write("\nWaiting")
+            sys.stdout.flush()
+            for i in range(interval):
+                time.sleep(1)
+                sys.stdout.write(".")
+                sys.stdout.flush()
+            sys.stdout.write("\r" + " " * 50 + "\r")  # Clear the line
+            sys.stdout.flush()
+    
     def run(self):
         """Run the main chair flying loop."""
         print("=" * 60)
@@ -179,14 +204,9 @@ class ChairFlying:
         
         try:
             while True:
-                # Wait for random interval
+                # Wait for random interval with countdown or progress indicator
                 interval = self.get_random_interval()
-                
-                # Show next maneuver time if configured
-                if self.config.get("show_next_maneuver_time", True):
-                    print(f"\nNext maneuver in {interval} seconds...")
-                
-                time.sleep(interval)
+                self.wait_with_countdown(interval)
                 
                 # Select and display maneuver
                 maneuver = self.select_maneuver()
