@@ -1,0 +1,5 @@
+# Chair Flying - Aviation Training Practice
+# This application uses only Python standard library
+# No external dependencies required
+
+# Python 3.7+ is required
