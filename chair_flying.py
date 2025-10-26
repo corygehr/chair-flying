@@ -246,6 +246,7 @@ class ChairFlying:
         print("Press Ctrl+C to stop at any time.\n")
         
         try:
+            quit_requested = False
             while True:
                 # Wait for random interval with countdown or progress indicator
                 interval = self.get_random_interval()
@@ -271,7 +272,8 @@ class ChairFlying:
                     
                     if response == 'q':
                         print("\nEnding practice session. Good work!")
-                        return  # Exit both loops
+                        quit_requested = True
+                        break  # Exit inner loop
                     elif response == 'n':
                         # Select a random phase (only reachable if maneuver has phases)
                         current_phase = self.select_phase(maneuver)
@@ -293,6 +295,10 @@ class ChairFlying:
                     elif response == 's':
                         print("Skipped (not recorded)")
                         break
+                
+                # Check if user wants to quit
+                if quit_requested:
+                    break  # Exit outer loop
         
         except KeyboardInterrupt:
             print("\n\nSession interrupted. Good work!")
