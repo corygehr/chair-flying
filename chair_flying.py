@@ -55,6 +55,10 @@ class ManeuverTracker:
 class ChairFlying:
     """Main application for chair flying practice."""
     
+    # Default interval settings
+    DEFAULT_INTERVAL_MIN = 30
+    DEFAULT_INTERVAL_MAX = 120
+    
     def __init__(self, config_file: str = "maneuvers.json"):
         self.config_file = Path(config_file)
         self.config = self.load_config()
@@ -78,8 +82,17 @@ class ChairFlying:
         if not config["maneuvers"]:
             raise ValueError("Configuration must contain at least one maneuver")
         
-        # Validate interval configuration if provided
-        if "interval_min" in config and "interval_max" in config:
+        # Validate interval configuration - both or neither should be provided
+        has_min = "interval_min" in config
+        has_max = "interval_max" in config
+        
+        if has_min != has_max:
+            raise ValueError(
+                "Both interval_min and interval_max must be provided together, "
+                "or neither (to use defaults)"
+            )
+        
+        if has_min and has_max:
             if config["interval_min"] > config["interval_max"]:
                 raise ValueError("interval_min must be less than or equal to interval_max")
         
@@ -87,8 +100,8 @@ class ChairFlying:
     
     def get_random_interval(self) -> int:
         """Get random interval between min and max from config."""
-        min_interval = self.config.get("interval_min", 30)
-        max_interval = self.config.get("interval_max", 120)
+        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
+        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
         return random.randint(min_interval, max_interval)
     
     def select_maneuver(self) -> Dict:
@@ -129,8 +142,8 @@ class ChairFlying:
         print("Chair Flying - Aviation Training Practice")
         print("=" * 60)
         print(f"\nLoaded {len(self.config['maneuvers'])} maneuvers")
-        min_interval = self.config.get("interval_min", 30)
-        max_interval = self.config.get("interval_max", 120)
+        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
+        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
         print(f"Interval: {min_interval}-{max_interval} seconds")
         print("\nStarting practice session...")
         print("Press Ctrl+C to stop at any time.\n")
