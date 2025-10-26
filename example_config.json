@@ -1,0 +1,8 @@
+{
+  "maneuvers_file": "maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 120,
+  "show_next_maneuver_time": true,
+  "show_maneuver_type": true,
+  "show_maneuver_description": true
+}

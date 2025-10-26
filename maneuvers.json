@@ -1,12 +1,9 @@
-{
-  "interval_min": 30,
-  "interval_max": 120,
-  "maneuvers": [
-    {
-      "name": "Engine Failure on Takeoff",
-      "type": "emergency",
-      "description": "Engine fails during takeoff roll or initial climb"
-    },
+[
+  {
+    "name": "Engine Failure on Takeoff",
+    "type": "emergency",
+    "description": "Engine fails during takeoff roll or initial climb"
+  },
     {
       "name": "Power-Off Stall",
       "type": "maneuver",
@@ -93,29 +90,13 @@
       "description": "Navigate using VOR station"
     },
     {
+      "name": "Partial Panel Flight",
+      "type": "emergency",
+      "description": "Flight with simulated instrument failure"
+    },
+    {
       "name": "Unusual Attitude Recovery",
       "type": "emergency",
       "description": "Recovery from unusual flight attitudes"
-    },
-    {
-      "name": "Engine Fire on Startup",
-      "type": "emergency",
-      "description": "Engine fire during startup procedure"
-    },
-    {
-      "name": "Chandelles",
-      "type": "maneuver",
-      "description": "A climbing turn maneuver to demonstrate energy management"
-    },
-    {
-      "name": "Lazy Eights",
-      "type": "maneuver",
-      "description": "A maneuver combining climbs and descents with 180-degree turns"
-    },
-    {
-      "name": "Eights on Pylons",
-      "type": "maneuver",
-      "description": "A maneuver to demonstrate ground reference and pylon tracking"
-    }
-  ]
-}
+  }
+]

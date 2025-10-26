@@ -5,8 +5,10 @@ A Python application that helps pilots practice "chair flying" by presenting ran
 ## Features
 
 - **Configurable Maneuvers**: Define your own list of maneuvers and emergency scenarios
+- **Separate Configuration**: Application settings separate from maneuver list
 - **Random Intervals**: Presents maneuvers at random time intervals (configurable)
 - **Type Classification**: Categorize maneuvers by type (emergency, maneuver, etc.)
+- **Display Options**: Control what information is shown during practice
 - **Progress Tracking**: Mark maneuvers as completed or for follow-up
 - **Session History**: Maintains a history of all practiced maneuvers
 - **Follow-up List**: Automatically tracks maneuvers that need more practice
@@ -25,41 +27,65 @@ cd chair-flying
 
 ## Configuration
 
-Create a `maneuvers.json` file in the same directory as the application. You can use the provided `example_maneuvers.json` as a template:
+The application uses two separate configuration files:
+
+### 1. Application Configuration (`config.json`)
+
+Create a `config.json` file with your application settings:
+
+```json
+{
+  "maneuvers_file": "maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 120,
+  "show_next_maneuver_time": true,
+  "show_maneuver_type": true,
+  "show_maneuver_description": true
+}
+```
+
+### 2. Maneuvers List (`maneuvers.json`)
+
+Create a `maneuvers.json` file with your maneuvers. You can use the provided `example_maneuvers.json` as a template:
 
 ```bash
 cp example_maneuvers.json maneuvers.json
 ```
 
-The configuration file has the following structure:
+The maneuvers file is a JSON array:
 
 ```json
-{
-  "interval_min": 30,
-  "interval_max": 120,
-  "maneuvers": [
-    {
-      "name": "Engine Failure on Takeoff",
-      "type": "emergency",
-      "description": "Engine fails during takeoff roll or initial climb"
-    },
-    {
-      "name": "Power-Off Stall",
-      "type": "maneuver",
-      "description": "Demonstrate recognition and recovery from power-off stall"
-    }
-  ]
-}
+[
+  {
+    "name": "Engine Failure on Takeoff",
+    "type": "emergency",
+    "description": "Engine fails during takeoff roll or initial climb"
+  },
+  {
+    "name": "Power-Off Stall",
+    "type": "maneuver",
+    "description": "Demonstrate recognition and recovery from power-off stall"
+  }
+]
 ```
 
 ### Configuration Options
 
-- `interval_min`: Minimum seconds between maneuvers (default: 30)
-- `interval_max`: Maximum seconds between maneuvers (default: 120)
-- `maneuvers`: Array of maneuver objects
-  - `name`: Name of the maneuver (required)
-  - `type`: Category of maneuver (e.g., "emergency", "maneuver", "normal")
-  - `description`: Optional description of the maneuver
+#### Application Configuration (`config.json`)
+
+- `maneuvers_file`: Path to the maneuvers JSON file (required)
+- `interval_min`: Minimum seconds between maneuvers (optional, default: 30)
+- `interval_max`: Maximum seconds between maneuvers (optional, default: 120)
+- `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
+- `show_maneuver_type`: Display the type of maneuver (optional, default: true)
+- `show_maneuver_description`: Display the maneuver description (optional, default: true)
+
+#### Maneuvers Configuration (`maneuvers.json`)
+
+Each maneuver object in the array can have:
+- `name`: Name of the maneuver (required)
+- `type`: Category of maneuver (e.g., "emergency", "maneuver", "normal") (optional)
+- `description`: Description of the maneuver (optional)
 
 ## Usage
 
@@ -72,7 +98,7 @@ python chair_flying.py
 ### Custom Configuration File
 
 ```bash
-python chair_flying.py my_custom_maneuvers.json
+python chair_flying.py my_custom_config.json
 ```
 
 ### During a Session
@@ -141,21 +167,57 @@ This allows you to:
 ### Quick Practice (Short Intervals)
 ```json
 {
+  "maneuvers_file": "maneuvers.json",
   "interval_min": 15,
   "interval_max": 30,
-  "maneuvers": [...]
+  "show_next_maneuver_time": true,
+  "show_maneuver_type": true,
+  "show_maneuver_description": true
+}
+```
+
+### Minimalist Display (No Extra Info)
+```json
+{
+  "maneuvers_file": "maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 120,
+  "show_next_maneuver_time": false,
+  "show_maneuver_type": false,
+  "show_maneuver_description": false
 }
 ```
 
 ### Emergency Focus
-Only include maneuvers with `"type": "emergency"`
+Create a separate maneuvers file with only emergency maneuvers:
+```json
+[
+  {
+    "name": "Engine Failure on Takeoff",
+    "type": "emergency",
+    "description": "..."
+  }
+]
+```
+
+Then reference it in your config:
+```json
+{
+  "maneuvers_file": "emergency_maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 120
+}
+```
 
 ### Extended Practice
 ```json
 {
+  "maneuvers_file": "maneuvers.json",
   "interval_min": 60,
   "interval_max": 180,
-  "maneuvers": [...]
+  "show_next_maneuver_time": true,
+  "show_maneuver_type": true,
+  "show_maneuver_description": true
 }
 ```
 

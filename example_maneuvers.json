@@ -1,12 +1,9 @@
-{
-  "interval_min": 30,
-  "interval_max": 120,
-  "maneuvers": [
-    {
-      "name": "Engine Failure on Takeoff",
-      "type": "emergency",
-      "description": "Engine fails during takeoff roll or initial climb"
-    },
+[
+  {
+    "name": "Engine Failure on Takeoff",
+    "type": "emergency",
+    "description": "Engine fails during takeoff roll or initial climb"
+  },
     {
       "name": "Power-Off Stall",
       "type": "maneuver",
@@ -101,6 +98,5 @@
       "name": "Unusual Attitude Recovery",
       "type": "emergency",
       "description": "Recovery from unusual flight attitudes"
-    }
-  ]
-}
+  }
+]

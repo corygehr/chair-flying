@@ -59,28 +59,26 @@ class ChairFlying:
     DEFAULT_INTERVAL_MIN = 30
     DEFAULT_INTERVAL_MAX = 120
     
-    def __init__(self, config_file: str = "maneuvers.json"):
+    def __init__(self, config_file: str = "config.json"):
         self.config_file = Path(config_file)
         self.config = self.load_config()
+        self.maneuvers = self.load_maneuvers()
         self.tracker = ManeuverTracker()
     
     def load_config(self) -> Dict:
-        """Load configuration from JSON file."""
+        """Load application configuration from JSON file."""
         if not self.config_file.exists():
             raise FileNotFoundError(
                 f"Configuration file '{self.config_file}' not found. "
-                "Please create it with your maneuvers."
+                "Please create it with your settings."
             )
         
         with open(self.config_file, 'r') as f:
             config = json.load(f)
         
         # Validate configuration
-        if "maneuvers" not in config:
-            raise ValueError("Configuration missing required key: maneuvers")
-        
-        if not config["maneuvers"]:
-            raise ValueError("Configuration must contain at least one maneuver")
+        if "maneuvers_file" not in config:
+            raise ValueError("Configuration missing required key: maneuvers_file")
         
         # Validate interval configuration - both or neither should be provided
         has_min = "interval_min" in config
@@ -96,7 +94,33 @@ class ChairFlying:
             if config["interval_min"] > config["interval_max"]:
                 raise ValueError("interval_min must be less than or equal to interval_max")
         
+        # Set default values for display options
+        config.setdefault("show_next_maneuver_time", True)
+        config.setdefault("show_maneuver_type", True)
+        config.setdefault("show_maneuver_description", True)
+        
         return config
+    
+    def load_maneuvers(self) -> List[Dict]:
+        """Load maneuvers from separate JSON file."""
+        maneuvers_file = Path(self.config["maneuvers_file"])
+        
+        if not maneuvers_file.exists():
+            raise FileNotFoundError(
+                f"Maneuvers file '{maneuvers_file}' not found. "
+                "Please create it with your maneuvers."
+            )
+        
+        with open(maneuvers_file, 'r') as f:
+            maneuvers = json.load(f)
+        
+        if not isinstance(maneuvers, list):
+            raise ValueError("Maneuvers file must contain a JSON array of maneuvers")
+        
+        if not maneuvers:
+            raise ValueError("Maneuvers file must contain at least one maneuver")
+        
+        return maneuvers
     
     def get_random_interval(self) -> int:
         """Get random interval between min and max from config."""
@@ -105,19 +129,24 @@ class ChairFlying:
         return random.randint(min_interval, max_interval)
     
     def select_maneuver(self) -> Dict:
-        """Select a random maneuver from the configuration."""
-        maneuvers = self.config["maneuvers"]
-        if not maneuvers:
+        """Select a random maneuver from the maneuvers list."""
+        if not self.maneuvers:
             raise ValueError("No maneuvers configured!")
-        return random.choice(maneuvers)
+        return random.choice(self.maneuvers)
     
     def display_maneuver(self, maneuver: Dict):
         """Display maneuver information to the user."""
         print("\n" + "=" * 60)
         print(f"MANEUVER: {maneuver['name']}")
-        print(f"Type: {maneuver.get('type', 'normal').upper()}")
-        if "description" in maneuver:
+        
+        # Show type if configured
+        if self.config.get("show_maneuver_type", True):
+            print(f"Type: {maneuver.get('type', 'normal').upper()}")
+        
+        # Show description if configured and available
+        if self.config.get("show_maneuver_description", True) and "description" in maneuver:
             print(f"Description: {maneuver['description']}")
+        
         print("=" * 60)
     
     def get_user_response(self) -> str:
@@ -141,7 +170,7 @@ class ChairFlying:
         print("=" * 60)
         print("Chair Flying - Aviation Training Practice")
         print("=" * 60)
-        print(f"\nLoaded {len(self.config['maneuvers'])} maneuvers")
+        print(f"\nLoaded {len(self.maneuvers)} maneuvers")
         min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
         max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
         print(f"Interval: {min_interval}-{max_interval} seconds")
@@ -152,7 +181,11 @@ class ChairFlying:
             while True:
                 # Wait for random interval
                 interval = self.get_random_interval()
-                print(f"\nNext maneuver in {interval} seconds...")
+                
+                # Show next maneuver time if configured
+                if self.config.get("show_next_maneuver_time", True):
+                    print(f"\nNext maneuver in {interval} seconds...")
+                
                 time.sleep(interval)
                 
                 # Select and display maneuver
@@ -201,7 +234,7 @@ def main():
     """Entry point for the application."""
     import sys
     
-    config_file = "maneuvers.json"
+    config_file = "config.json"
     
     # Allow custom config file as command line argument
     if len(sys.argv) > 1:
@@ -212,8 +245,8 @@ def main():
         app.run()
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("\nPlease create a maneuvers.json file with your configuration.")
-        print("See example_maneuvers.json for the format.")
+        print("\nPlease create config.json and maneuvers.json files.")
+        print("See config.json and example_maneuvers.json for the format.")
         sys.exit(1)
     except Exception as e:
         print(f"Error: {e}")
