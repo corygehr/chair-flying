@@ -37,11 +37,13 @@
   {
     "name": "Power-Off Stall",
     "type": "maneuver",
+    "kind": "private",
     "description": "Demonstrate recognition and recovery from power-off stall"
   },
   {
     "name": "Power-On Stall",
     "type": "maneuver",
+    "kind": "private",
     "description": "Demonstrate recognition and recovery from power-on stall"
   },
   {
@@ -57,21 +59,25 @@
   {
     "name": "Short Field Takeoff",
     "type": "maneuver",
+    "kind": "private",
     "description": "Maximum performance takeoff from a short field"
   },
   {
     "name": "Short Field Landing",
     "type": "maneuver",
+    "kind": "private",
     "description": "Approach and landing on a short field"
   },
   {
     "name": "Soft Field Takeoff",
     "type": "maneuver",
+    "kind": "private",
     "description": "Takeoff from a soft or rough field"
   },
   {
     "name": "Soft Field Landing",
     "type": "maneuver",
+    "kind": "private",
     "description": "Landing on a soft or rough field"
   },
   {
@@ -82,11 +88,13 @@
   {
     "name": "Steep Turns",
     "type": "maneuver",
+    "kind": "private",
     "description": "45-degree banked turns maintaining altitude"
   },
   {
     "name": "Slow Flight",
     "type": "maneuver",
+    "kind": "private",
     "description": "Flight at minimum controllable airspeed"
   },
   {
@@ -100,43 +108,38 @@
     "description": "Loss of radio communication capability"
   },
   {
-    "name": "Emergency Landing",
+    "name": "Forced Landing",
     "type": "emergency",
     "description": "Forced landing due to engine failure"
   },
   {
     "name": "Go-Around",
     "type": "maneuver",
+    "kind": "private",
     "description": "Abort landing and return to traffic pattern"
-  },
-  {
-    "name": "Crosswind Landing",
-    "type": "maneuver",
-    "description": "Landing with significant crosswind component"
-  },
-  {
-    "name": "VOR Navigation",
-    "type": "maneuver",
-    "description": "Navigate using VOR station"
-  },
-  {
-    "name": "Partial Panel Flight",
-    "type": "emergency",
-    "description": "Flight with simulated instrument failure"
-  },
-  {
-    "name": "Unusual Attitude Recovery",
-    "type": "emergency",
-    "description": "Recovery from unusual flight attitudes"
   },
   {
     "name": "Chandelles",
     "type": "maneuver",
+    "kind": "commercial",
     "description": "Maximum performance climbing turn"
   },
   {
     "name": "Lazy Eights",
     "type": "maneuver",
+    "kind": "commercial",
     "description": "Series of climbing and descending turns"
+  },
+  {
+    "name": "Steep Spirals",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "Steep descending turns around a point"
+  },
+  {
+    "name": "Steep Turns",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "50-degree banked turns maintaining altitude"
   }
 ]
