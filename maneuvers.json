@@ -15,6 +15,21 @@
     ]
   },
   {
+    "name": "Engine Failure In Flight",
+    "type": "emergency",
+    "description": "Engine suddenly fails during flight",
+    "phases": [
+      {
+        "name": "Restart Successful",
+        "description": "Engine restart attempt is successful"
+      },
+      {
+        "name": "Restart Unsuccessful",
+        "description": "Engine restart attempt fails"
+      }
+    ]
+  },
+  {
     "name": "Engine Failure on Takeoff",
     "type": "emergency",
     "description": "Engine fails during takeoff roll or initial climb"
