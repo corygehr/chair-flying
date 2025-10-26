@@ -79,6 +79,7 @@ The maneuvers file is a JSON array:
 - `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
 - `show_maneuver_type`: Display the type of maneuver (optional, default: true)
 - `show_maneuver_description`: Display the maneuver description (optional, default: true)
+- `exclude_emergencies`: Exclude maneuvers with type "emergency" from practice sessions (optional, default: false)
 
 #### Maneuvers Configuration (`maneuvers.json`)
 
@@ -243,6 +244,17 @@ Then reference it in your config:
   "maneuvers_file": "emergency_maneuvers.json",
   "interval_min": 30,
   "interval_max": 120
+}
+```
+
+### Non-Emergency Maneuvers Only
+To practice only standard maneuvers and exclude emergencies:
+```json
+{
+  "maneuvers_file": "maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 120,
+  "exclude_emergencies": true
 }
 ```
 

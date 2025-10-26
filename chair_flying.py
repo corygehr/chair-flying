@@ -101,6 +101,9 @@ class ChairFlying:
         config.setdefault("show_maneuver_type", True)
         config.setdefault("show_maneuver_description", True)
         
+        # Set default value for excluding emergencies
+        config.setdefault("exclude_emergencies", False)
+        
         return config
     
     def load_maneuvers(self) -> List[Dict]:
@@ -121,6 +124,17 @@ class ChairFlying:
         
         if not maneuvers:
             raise ValueError("Maneuvers file must contain at least one maneuver")
+        
+        # Filter out emergencies if configured to exclude them
+        if self.config.get("exclude_emergencies", False):
+            maneuvers = [m for m in maneuvers if m.get("type", "").lower() != "emergency"]
+            
+            # Ensure we still have maneuvers after filtering
+            if not maneuvers:
+                raise ValueError(
+                    "No maneuvers available after excluding emergencies. "
+                    "Please add non-emergency maneuvers or disable 'exclude_emergencies'."
+                )
         
         return maneuvers
     
