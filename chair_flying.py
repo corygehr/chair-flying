@@ -238,8 +238,12 @@ class ChairFlying:
                 while True:
                     self.display_maneuver(maneuver, current_phase)
                     
+                    # Determine if we should show the "next phase" option
+                    # Only show it when maneuver has phases and we haven't selected one yet
+                    show_next_phase_option = has_phases and current_phase is None
+                    
                     # Get user response
-                    response = self.get_user_response(has_phases and current_phase is None)
+                    response = self.get_user_response(show_next_phase_option)
                     
                     if response == 'q':
                         print("\nEnding practice session. Good work!")
@@ -247,12 +251,8 @@ class ChairFlying:
                     elif response == 'n':
                         # Select a random phase
                         current_phase = self.select_phase(maneuver)
-                        if current_phase:
-                            print(f"\n→ Proceeding to next phase...")
-                            continue  # Show the phase
-                        else:
-                            print("No phases available.")
-                            break
+                        print(f"\n→ Proceeding to next phase...")
+                        continue  # Show the phase
                     elif response == 'c':
                         self.tracker.record_maneuver(maneuver, "completed", current_phase)
                         print("✓ Marked as completed")

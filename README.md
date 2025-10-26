@@ -121,6 +121,7 @@ When practicing a multi-phase maneuver:
 2. An additional `[n] Next phase` option appears
 3. Selecting `[n]` randomly chooses and displays one of the available phases
 4. Once in a phase, the `[n]` option is no longer shown
+5. After completing, skipping, or marking a phase for follow-up, the application proceeds to wait for the next maneuver (you cannot go back to see other phases of the same maneuver in the same iteration)
 
 ## Usage
 
