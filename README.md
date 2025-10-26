@@ -6,6 +6,8 @@ A Python application that helps pilots practice "chair flying" by presenting ran
 
 - **Configurable Maneuvers**: Define your own list of maneuvers and emergency scenarios
 - **Separate Configuration**: Application settings separate from maneuver list
+- **Interactive Selection**: Choose at startup which maneuvers to practice (Private, Commercial, or All) and whether to include emergencies
+- **Maneuver Classification**: Categorize maneuvers by pilot certification level (Private, Commercial)
 - **Random Intervals**: Presents maneuvers at random time intervals (configurable)
 - **Type Classification**: Categorize maneuvers by type (emergency, maneuver, etc.)
 - **Display Options**: Control what information is shown during practice
@@ -64,7 +66,14 @@ The maneuvers file is a JSON array:
   {
     "name": "Power-Off Stall",
     "type": "maneuver",
+    "kind": "private",
     "description": "Demonstrate recognition and recovery from power-off stall"
+  },
+  {
+    "name": "Chandelles",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "Maximum performance climbing turn"
   }
 ]
 ```
@@ -79,13 +88,13 @@ The maneuvers file is a JSON array:
 - `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
 - `show_maneuver_type`: Display the type of maneuver (optional, default: true)
 - `show_maneuver_description`: Display the maneuver description (optional, default: true)
-- `exclude_emergencies`: Exclude maneuvers with type "emergency" from practice sessions (optional, default: false)
 
 #### Maneuvers Configuration (`maneuvers.json`)
 
 Each maneuver object in the array can have:
 - `name`: Name of the maneuver (required)
 - `type`: Category of maneuver (e.g., "emergency", "maneuver", "normal") (optional)
+- `kind`: Pilot certification level for the maneuver ("private", "commercial") (optional, not used for emergencies)
 - `description`: Description of the maneuver (optional)
 - `phases`: Array of phase objects for multi-phase maneuvers (optional)
 
@@ -132,6 +141,18 @@ When practicing a multi-phase maneuver:
 python chair_flying.py
 ```
 
+When you start the application, you'll be prompted to select:
+1. **Maneuver kind**: Choose which type of maneuvers to practice
+   - `[p]` Private pilot maneuvers
+   - `[c]` Commercial pilot maneuvers  
+   - `[a]` All maneuvers (default - press Enter)
+   
+2. **Emergency scenarios**: Choose whether to include emergency scenarios
+   - `[y]` Yes, include emergencies (default - press Enter)
+   - `[n]` No, exclude emergencies
+
+The application will then filter the maneuvers based on your selections and display a configuration summary before starting the practice session.
+
 ### Custom Configuration File
 
 ```bash
@@ -157,8 +178,33 @@ python chair_flying.py my_custom_config.json
 Chair Flying - Aviation Training Practice
 ============================================================
 
-Loaded 20 maneuvers
-Interval: 30-120 seconds
+Which maneuvers would you like to practice?
+  [p] Private pilot maneuvers
+  [c] Commercial pilot maneuvers
+  [a] All maneuvers (default)
+
+Your choice (p/c/a or Enter for all): 
+
+Include emergency scenarios?
+  [y] Yes (default)
+  [n] No
+
+Your choice (y/n or Enter for yes): 
+
+Configuration Summary:
+------------------------------------------------------------
+Maneuvers loaded: 24
+  - Emergency maneuvers: 11
+  - Private pilot maneuvers: 11
+  - Commercial pilot maneuvers: 2
+Selected kind: All
+Emergency scenarios: Included
+Interval range: 30-120 seconds
+Display options:
+  - Show countdown timer: Yes
+  - Show maneuver type: Yes
+  - Show descriptions: Yes
+------------------------------------------------------------
 
 Starting practice session...
 Press Ctrl+C to stop at any time.
@@ -198,7 +244,8 @@ This allows you to:
 - Create different configuration files for different training phases
 - Adjust intervals for longer or shorter practice sessions
 - Add custom maneuver types relevant to your aircraft or training
-- Create emergency-only or maneuver-only configurations
+- Create separate maneuvers files for different training focuses (e.g., emergency-only, private-only, commercial-only)
+- Use the interactive prompts at startup to select which maneuvers to practice each session
 
 ## Example Configurations
 
@@ -247,16 +294,7 @@ Then reference it in your config:
 }
 ```
 
-### Non-Emergency Maneuvers Only
-To practice only standard maneuvers and exclude emergencies:
-```json
-{
-  "maneuvers_file": "maneuvers.json",
-  "interval_min": 30,
-  "interval_max": 120,
-  "exclude_emergencies": true
-}
-```
+Alternatively, you can use the main maneuvers.json file and select to exclude emergencies when prompted at startup.
 
 ### Extended Practice
 ```json
