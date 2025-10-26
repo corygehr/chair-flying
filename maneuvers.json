@@ -129,5 +129,17 @@
     "type": "maneuver",
     "kind": "commercial",
     "description": "Series of climbing and descending turns"
+  },
+  {
+    "name": "Steep Spirals",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "Steep descending turns around a point"
+  },
+  {
+    "name": "Steep Turns",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "50-degree banked turns maintaining altitude"
   }
 ]
