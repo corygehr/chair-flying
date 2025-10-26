@@ -137,15 +137,16 @@ class ChairFlying:
         """Prompt user to select which kind of maneuvers to practice.
         
         Returns:
-            str: 'private', 'commercial', or 'all'
+            str: 'private', 'commercial', 'emergency', or 'all'
         """
         print("\nWhich maneuvers would you like to practice?")
         print("  [p] Private pilot maneuvers")
         print("  [c] Commercial pilot maneuvers")
+        print("  [e] Emergencies only")
         print("  [a] All maneuvers (default)")
         
         while True:
-            response = input("\nYour choice (p/c/a or Enter for all): ").strip().lower()
+            response = input("\nYour choice (p/c/e/a or Enter for all): ").strip().lower()
             
             if response == '' or response == 'a' or response == 'all':
                 return 'all'
@@ -153,8 +154,10 @@ class ChairFlying:
                 return 'private'
             elif response == 'c' or response == 'commercial':
                 return 'commercial'
+            elif response == 'e' or response == 'emergency' or response == 'emergencies':
+                return 'emergency'
             else:
-                print("Invalid choice. Please select p, c, a, or press Enter for all.")
+                print("Invalid choice. Please select p, c, e, a, or press Enter for all.")
     
     def prompt_include_emergencies(self) -> bool:
         """Prompt user whether to include emergency scenarios.
@@ -180,8 +183,11 @@ class ChairFlying:
         """Filter maneuvers based on user preferences."""
         filtered = self.all_maneuvers.copy()
         
-        # Filter by kind if not 'all'
-        if self.maneuver_kind != 'all':
+        # Filter by kind
+        if self.maneuver_kind == 'emergency':
+            # Only emergencies
+            filtered = [m for m in filtered if m.get("type", "").lower() == "emergency"]
+        elif self.maneuver_kind != 'all':
             # Keep emergencies (they don't have a kind) and maneuvers matching the selected kind
             filtered = [
                 m for m in filtered
@@ -189,8 +195,8 @@ class ChairFlying:
                    m.get("kind", "").lower() == self.maneuver_kind
             ]
         
-        # Filter out emergencies if user chose not to include them
-        if not self.include_emergencies:
+        # Filter out emergencies if user chose not to include them (only applicable when not emergency-only mode)
+        if not self.include_emergencies and self.maneuver_kind != 'emergency':
             filtered = [m for m in filtered if m.get("type", "").lower() != "emergency"]
         
         # Ensure we have at least one maneuver
@@ -311,10 +317,14 @@ class ChairFlying:
         print(f"  - Commercial pilot maneuvers: {commercial_count}")
         
         # User selections
-        kind_display = self.maneuver_kind.capitalize() if self.maneuver_kind else "All"
+        if self.maneuver_kind == 'emergency':
+            kind_display = "Emergencies only"
+        else:
+            kind_display = self.maneuver_kind.capitalize() if self.maneuver_kind else "All"
         emergencies_display = "Included" if self.include_emergencies else "Excluded"
         print(f"Selected kind: {kind_display}")
-        print(f"Emergency scenarios: {emergencies_display}")
+        if self.maneuver_kind != 'emergency':
+            print(f"Emergency scenarios: {emergencies_display}")
         
         # Interval settings
         min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
@@ -341,7 +351,12 @@ class ChairFlying:
         
         # Prompt user for preferences
         self.maneuver_kind = self.prompt_maneuver_kind()
-        self.include_emergencies = self.prompt_include_emergencies()
+        
+        # Only ask about emergencies if not in emergency-only mode
+        if self.maneuver_kind == 'emergency':
+            self.include_emergencies = True  # Implied when emergency-only is selected
+        else:
+            self.include_emergencies = self.prompt_include_emergencies()
         
         # Filter maneuvers based on user preferences
         try:

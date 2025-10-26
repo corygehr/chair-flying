@@ -144,10 +144,11 @@ python chair_flying.py
 When you start the application, you'll be prompted to select:
 1. **Maneuver kind**: Choose which type of maneuvers to practice
    - `[p]` Private pilot maneuvers
-   - `[c]` Commercial pilot maneuvers  
+   - `[c]` Commercial pilot maneuvers
+   - `[e]` Emergencies only
    - `[a]` All maneuvers (default - press Enter)
    
-2. **Emergency scenarios**: Choose whether to include emergency scenarios
+2. **Emergency scenarios**: Choose whether to include emergency scenarios (only asked if you didn't select "Emergencies only")
    - `[y]` Yes, include emergencies (default - press Enter)
    - `[n]` No, exclude emergencies
 
@@ -181,9 +182,10 @@ Chair Flying - Aviation Training Practice
 Which maneuvers would you like to practice?
   [p] Private pilot maneuvers
   [c] Commercial pilot maneuvers
+  [e] Emergencies only
   [a] All maneuvers (default)
 
-Your choice (p/c/a or Enter for all): 
+Your choice (p/c/e/a or Enter for all): 
 
 Include emergency scenarios?
   [y] Yes (default)
