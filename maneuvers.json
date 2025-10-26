@@ -1,5 +1,20 @@
 [
   {
+    "name": "Engine Fire During Startup",
+    "type": "emergency",
+    "description": "Engine fire occurs during startup procedure",
+    "phases": [
+      {
+        "name": "Engine Starts",
+        "description": "Engine successfully starts despite the fire"
+      },
+      {
+        "name": "Engine Fails to Start",
+        "description": "Engine does not start"
+      }
+    ]
+  },
+  {
     "name": "Engine Failure on Takeoff",
     "type": "emergency",
     "description": "Engine fails during takeoff roll or initial climb"

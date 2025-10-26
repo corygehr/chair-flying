@@ -86,6 +86,41 @@ Each maneuver object in the array can have:
 - `name`: Name of the maneuver (required)
 - `type`: Category of maneuver (e.g., "emergency", "maneuver", "normal") (optional)
 - `description`: Description of the maneuver (optional)
+- `phases`: Array of phase objects for multi-phase maneuvers (optional)
+
+##### Multi-Phase Maneuvers
+
+Some maneuvers have multiple phases or variants. For example, an engine fire during startup may have different outcomes depending on whether the engine starts or not. Multi-phase maneuvers allow you to practice different scenarios within a single maneuver.
+
+To create a multi-phase maneuver, add a `phases` array:
+
+```json
+{
+  "name": "Engine Fire During Startup",
+  "type": "emergency",
+  "description": "Engine fire occurs during startup procedure",
+  "phases": [
+    {
+      "name": "Engine Starts",
+      "description": "Engine successfully starts despite the fire"
+    },
+    {
+      "name": "Engine Fails to Start",
+      "description": "Engine does not start"
+    }
+  ]
+}
+```
+
+Each phase object can have:
+- `name`: Name of the phase (required)
+- `description`: Description of the phase (optional)
+
+When practicing a multi-phase maneuver:
+1. The initial maneuver is displayed first
+2. An additional `[n] Next phase` option appears
+3. Selecting `[n]` randomly chooses and displays one of the available phases
+4. Once in a phase, the `[n]` option is no longer shown
 
 ## Usage
 
@@ -110,6 +145,7 @@ python chair_flying.py my_custom_config.json
    - **[c]** Completed - Mark as successfully completed
    - **[f]** Follow-up needed - Mark for additional practice
    - **[s]** Skip - Don't record this attempt
+   - **[n]** Next phase - (Only shown for multi-phase maneuvers) Proceed to a randomly selected phase
    - **[q]** Quit - End the session
 
 ### Example Session

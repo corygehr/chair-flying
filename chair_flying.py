@@ -36,7 +36,7 @@ class ManeuverTracker:
         with open(self.history_file, 'w') as f:
             json.dump(self.history, f, indent=2)
     
-    def record_maneuver(self, maneuver: Dict, status: str):
+    def record_maneuver(self, maneuver: Dict, status: str, phase: Optional[Dict] = None):
         """Record a maneuver attempt with timestamp and status."""
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -44,6 +44,8 @@ class ManeuverTracker:
             "type": maneuver.get("type", "normal"),
             "status": status
         }
+        if phase:
+            entry["phase"] = phase["name"]
         self.history.append(entry)
         self.save_history()
     
@@ -134,7 +136,13 @@ class ChairFlying:
             raise ValueError("No maneuvers configured!")
         return random.choice(self.maneuvers)
     
-    def display_maneuver(self, maneuver: Dict):
+    def select_phase(self, maneuver: Dict) -> Optional[Dict]:
+        """Select a random phase from the maneuver's phases."""
+        if "phases" not in maneuver or not maneuver["phases"]:
+            return None
+        return random.choice(maneuver["phases"])
+    
+    def display_maneuver(self, maneuver: Dict, phase: Optional[Dict] = None):
         """Display maneuver information to the user."""
         print("\n" + "=" * 60)
         print(f"MANEUVER: {maneuver['name']}")
@@ -147,23 +155,36 @@ class ChairFlying:
         if self.config.get("show_maneuver_description", True) and "description" in maneuver:
             print(f"Description: {maneuver['description']}")
         
+        # Show phase information if provided
+        if phase:
+            print(f"\nPHASE: {phase['name']}")
+            if self.config.get("show_maneuver_description", True) and "description" in phase:
+                print(f"Phase Description: {phase['description']}")
+        
         print("=" * 60)
     
-    def get_user_response(self) -> str:
+    def get_user_response(self, has_phases: bool = False) -> str:
         """Get user response for maneuver completion."""
         while True:
             print("\nOptions:")
             print("  [c] Completed")
             print("  [f] Follow-up needed")
             print("  [s] Skip (no recording)")
+            if has_phases:
+                print("  [n] Next phase")
             print("  [q] Quit")
             
             response = input("\nYour response: ").strip().lower()
             
-            if response in ['c', 'f', 's', 'q']:
+            valid_responses = ['c', 'f', 's', 'q']
+            if has_phases:
+                valid_responses.append('n')
+            
+            if response in valid_responses:
                 return response
             else:
-                print("Invalid input. Please choose c, f, s, or q.")
+                options = ", ".join(valid_responses)
+                print(f"Invalid input. Please choose {options}.")
     
     def wait_with_countdown(self, interval: int):
         """Wait for the specified interval with a countdown or progress indicator."""
@@ -210,22 +231,39 @@ class ChairFlying:
                 
                 # Select and display maneuver
                 maneuver = self.select_maneuver()
-                self.display_maneuver(maneuver)
+                current_phase = None
+                has_phases = "phases" in maneuver and maneuver["phases"]
                 
-                # Get user response
-                response = self.get_user_response()
-                
-                if response == 'q':
-                    print("\nEnding practice session. Good work!")
-                    break
-                elif response == 'c':
-                    self.tracker.record_maneuver(maneuver, "completed")
-                    print("✓ Marked as completed")
-                elif response == 'f':
-                    self.tracker.record_maneuver(maneuver, "follow-up")
-                    print("⚠ Marked for follow-up")
-                elif response == 's':
-                    print("Skipped (not recorded)")
+                # Inner loop for handling phases
+                while True:
+                    self.display_maneuver(maneuver, current_phase)
+                    
+                    # Get user response
+                    response = self.get_user_response(has_phases and current_phase is None)
+                    
+                    if response == 'q':
+                        print("\nEnding practice session. Good work!")
+                        return  # Exit both loops
+                    elif response == 'n':
+                        # Select a random phase
+                        current_phase = self.select_phase(maneuver)
+                        if current_phase:
+                            print(f"\n→ Proceeding to next phase...")
+                            continue  # Show the phase
+                        else:
+                            print("No phases available.")
+                            break
+                    elif response == 'c':
+                        self.tracker.record_maneuver(maneuver, "completed", current_phase)
+                        print("✓ Marked as completed")
+                        break
+                    elif response == 'f':
+                        self.tracker.record_maneuver(maneuver, "follow-up", current_phase)
+                        print("⚠ Marked for follow-up")
+                        break
+                    elif response == 's':
+                        print("Skipped (not recorded)")
+                        break
         
         except KeyboardInterrupt:
             print("\n\nSession interrupted. Good work!")
