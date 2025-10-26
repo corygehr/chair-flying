@@ -274,7 +274,7 @@ class ChairFlying:
     def run(self):
         """Run the main chair flying loop."""
         print("=" * 60)
-        print("Chair Flying - Aviation Training Practice")
+        print("Chair Flying -  Checklist Memorization Aid")
         print("=" * 60)
         
         # Display configuration summary
@@ -309,7 +309,7 @@ class ChairFlying:
                     response = self.get_user_response(show_next=show_next, show_complete=show_complete)
                     
                     if response == 'q':
-                        print("\nEnding practice session. Good work!")
+                        print("\nEnding practice session.")
                         quit_requested = True
                         break  # Exit inner loop
                     elif response == 'n':
@@ -339,7 +339,7 @@ class ChairFlying:
                     break  # Exit outer loop
         
         except KeyboardInterrupt:
-            print("\n\nSession interrupted. Good work!")
+            print("\n\nSession interrupted.")
         
         # Show summary
         self.show_summary()
@@ -356,7 +356,7 @@ class ChairFlying:
             for entry in follow_ups:
                 print(f"  - {entry['maneuver']} ({entry['type']})")
         else:
-            print("\nNo maneuvers marked for review. Great job!")
+            print("\nNo maneuvers marked for review.")
         
         print(f"\nTotal history entries: {len(self.tracker.history)}")
 
