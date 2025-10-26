@@ -93,11 +93,6 @@
       "description": "Navigate using VOR station"
     },
     {
-      "name": "Partial Panel Flight",
-      "type": "emergency",
-      "description": "Flight with simulated instrument failure"
-    },
-    {
       "name": "Unusual Attitude Recovery",
       "type": "emergency",
       "description": "Recovery from unusual flight attitudes"
