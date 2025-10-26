@@ -4,6 +4,5 @@
   "interval_max": 20,
   "show_next_maneuver_time": false,
   "show_maneuver_type": true,
-  "show_maneuver_description": true,
-  "exclude_emergencies": false
+  "show_maneuver_description": true
 }

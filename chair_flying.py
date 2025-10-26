@@ -64,8 +64,11 @@ class ChairFlying:
     def __init__(self, config_file: str = "config.json"):
         self.config_file = Path(config_file)
         self.config = self.load_config()
-        self.maneuvers = self.load_maneuvers()
+        self.all_maneuvers = self.load_maneuvers()
+        self.maneuvers = []  # Will be set based on user selection
         self.tracker = ManeuverTracker()
+        self.include_emergencies = None
+        self.maneuver_kind = None
     
     def load_config(self) -> Dict:
         """Load application configuration from JSON file."""
@@ -101,9 +104,6 @@ class ChairFlying:
         config.setdefault("show_maneuver_type", True)
         config.setdefault("show_maneuver_description", True)
         
-        # Set default value for excluding emergencies
-        config.setdefault("exclude_emergencies", False)
-        
         return config
     
     def load_maneuvers(self) -> List[Dict]:
@@ -125,17 +125,6 @@ class ChairFlying:
         if not maneuvers:
             raise ValueError("Maneuvers file must contain at least one maneuver")
         
-        # Filter out emergencies if configured to exclude them
-        if self.config.get("exclude_emergencies", False):
-            maneuvers = [m for m in maneuvers if m.get("type", "").lower() != "emergency"]
-            
-            # Ensure we still have maneuvers after filtering
-            if not maneuvers:
-                raise ValueError(
-                    "No maneuvers available after excluding emergencies. "
-                    "Please add non-emergency maneuvers or disable 'exclude_emergencies'."
-                )
-        
         return maneuvers
     
     def get_random_interval(self) -> int:
@@ -143,6 +132,75 @@ class ChairFlying:
         min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
         max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
         return random.randint(min_interval, max_interval)
+    
+    def prompt_maneuver_kind(self) -> str:
+        """Prompt user to select which kind of maneuvers to practice.
+        
+        Returns:
+            str: 'private', 'commercial', or 'all'
+        """
+        print("\nWhich maneuvers would you like to practice?")
+        print("  [p] Private pilot maneuvers")
+        print("  [c] Commercial pilot maneuvers")
+        print("  [a] All maneuvers (default)")
+        
+        while True:
+            response = input("\nYour choice (p/c/a or Enter for all): ").strip().lower()
+            
+            if response == '' or response == 'a' or response == 'all':
+                return 'all'
+            elif response == 'p' or response == 'private':
+                return 'private'
+            elif response == 'c' or response == 'commercial':
+                return 'commercial'
+            else:
+                print("Invalid choice. Please select p, c, a, or press Enter for all.")
+    
+    def prompt_include_emergencies(self) -> bool:
+        """Prompt user whether to include emergency scenarios.
+        
+        Returns:
+            bool: True to include emergencies, False to exclude
+        """
+        print("\nInclude emergency scenarios?")
+        print("  [y] Yes (default)")
+        print("  [n] No")
+        
+        while True:
+            response = input("\nYour choice (y/n or Enter for yes): ").strip().lower()
+            
+            if response == '' or response == 'y' or response == 'yes':
+                return True
+            elif response == 'n' or response == 'no':
+                return False
+            else:
+                print("Invalid choice. Please select y, n, or press Enter for yes.")
+    
+    def filter_maneuvers(self):
+        """Filter maneuvers based on user preferences."""
+        filtered = self.all_maneuvers.copy()
+        
+        # Filter by kind if not 'all'
+        if self.maneuver_kind != 'all':
+            # Keep emergencies (they don't have a kind) and maneuvers matching the selected kind
+            filtered = [
+                m for m in filtered
+                if m.get("type", "").lower() == "emergency" or 
+                   m.get("kind", "").lower() == self.maneuver_kind
+            ]
+        
+        # Filter out emergencies if user chose not to include them
+        if not self.include_emergencies:
+            filtered = [m for m in filtered if m.get("type", "").lower() != "emergency"]
+        
+        # Ensure we have at least one maneuver
+        if not filtered:
+            raise ValueError(
+                "No maneuvers match your selection criteria. "
+                "Please adjust your preferences or add more maneuvers."
+            )
+        
+        self.maneuvers = filtered
     
     def select_maneuver(self) -> Dict:
         """Select a random maneuver from the maneuvers list."""
@@ -243,16 +301,20 @@ class ChairFlying:
         emergency_count = sum(1 for m in self.maneuvers if m.get("type", "").lower() == "emergency")
         non_emergency_count = total_maneuvers - emergency_count
         
+        # Count by kind
+        private_count = sum(1 for m in self.maneuvers if m.get("kind", "").lower() == "private")
+        commercial_count = sum(1 for m in self.maneuvers if m.get("kind", "").lower() == "commercial")
+        
         print(f"Maneuvers loaded: {total_maneuvers}")
         print(f"  - Emergency maneuvers: {emergency_count}")
-        print(f"  - Standard maneuvers: {non_emergency_count}")
+        print(f"  - Private pilot maneuvers: {private_count}")
+        print(f"  - Commercial pilot maneuvers: {commercial_count}")
         
-        # Emergency filtering
-        exclude_emergencies = self.config.get("exclude_emergencies", False)
-        if exclude_emergencies:
-            print(f"Emergency filtering: ENABLED (emergencies excluded)")
-        else:
-            print(f"Emergency filtering: DISABLED (all types included)")
+        # User selections
+        kind_display = self.maneuver_kind.capitalize() if self.maneuver_kind else "All"
+        emergencies_display = "Included" if self.include_emergencies else "Excluded"
+        print(f"Selected kind: {kind_display}")
+        print(f"Emergency scenarios: {emergencies_display}")
         
         # Interval settings
         min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
@@ -276,6 +338,17 @@ class ChairFlying:
         print("=" * 60)
         print("Chair Flying -  Checklist Memorization Aid")
         print("=" * 60)
+        
+        # Prompt user for preferences
+        self.maneuver_kind = self.prompt_maneuver_kind()
+        self.include_emergencies = self.prompt_include_emergencies()
+        
+        # Filter maneuvers based on user preferences
+        try:
+            self.filter_maneuvers()
+        except ValueError as e:
+            print(f"\nError: {e}")
+            return
         
         # Display configuration summary
         self.show_config_summary()
