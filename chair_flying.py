@@ -233,15 +233,53 @@ class ChairFlying:
             sys.stdout.write("\r" + " " * 50 + "\r")  # Clear the line
             sys.stdout.flush()
     
+    def show_config_summary(self):
+        """Display a summary of all configuration options."""
+        print("\nConfiguration Summary:")
+        print("-" * 60)
+        
+        # Maneuvers loaded
+        total_maneuvers = len(self.maneuvers)
+        emergency_count = sum(1 for m in self.maneuvers if m.get("type", "").lower() == "emergency")
+        non_emergency_count = total_maneuvers - emergency_count
+        
+        print(f"Maneuvers loaded: {total_maneuvers}")
+        print(f"  - Emergency maneuvers: {emergency_count}")
+        print(f"  - Standard maneuvers: {non_emergency_count}")
+        
+        # Emergency filtering
+        exclude_emergencies = self.config.get("exclude_emergencies", False)
+        if exclude_emergencies:
+            print(f"Emergency filtering: ENABLED (emergencies excluded)")
+        else:
+            print(f"Emergency filtering: DISABLED (all types included)")
+        
+        # Interval settings
+        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
+        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
+        print(f"Interval range: {min_interval}-{max_interval} seconds")
+        
+        # Display options
+        show_time = self.config.get("show_next_maneuver_time", True)
+        show_type = self.config.get("show_maneuver_type", True)
+        show_desc = self.config.get("show_maneuver_description", True)
+        
+        print(f"Display options:")
+        print(f"  - Show countdown timer: {'Yes' if show_time else 'No'}")
+        print(f"  - Show maneuver type: {'Yes' if show_type else 'No'}")
+        print(f"  - Show descriptions: {'Yes' if show_desc else 'No'}")
+        
+        print("-" * 60)
+    
     def run(self):
         """Run the main chair flying loop."""
         print("=" * 60)
         print("Chair Flying - Aviation Training Practice")
         print("=" * 60)
-        print(f"\nLoaded {len(self.maneuvers)} maneuvers")
-        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
-        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
-        print(f"Interval: {min_interval}-{max_interval} seconds")
+        
+        # Display configuration summary
+        self.show_config_summary()
+        
         print("\nStarting practice session...")
         print("Press Ctrl+C to stop at any time.\n")
         
