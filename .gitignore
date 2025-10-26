@@ -208,6 +208,4 @@ __marimo__/
 
 # Chair Flying Application
 # User's personal configuration and history files
-config.json
-maneuvers.json
 maneuver_history.json
