@@ -1,102 +1,142 @@
 [
   {
+    "name": "Engine Fire During Startup",
+    "type": "emergency",
+    "description": "Engine fire occurs during startup procedure",
+    "phases": [
+      {
+        "name": "Engine Starts",
+        "description": "Engine successfully starts despite the fire"
+      },
+      {
+        "name": "Engine Fails to Start",
+        "description": "Engine does not start"
+      }
+    ]
+  },
+  {
+    "name": "Engine Failure In Flight",
+    "type": "emergency",
+    "description": "Engine suddenly fails during flight",
+    "phases": [
+      {
+        "name": "Restart Successful",
+        "description": "Engine restart attempt is successful"
+      },
+      {
+        "name": "Restart Unsuccessful",
+        "description": "Engine restart attempt fails"
+      }
+    ]
+  },
+  {
     "name": "Engine Failure on Takeoff",
     "type": "emergency",
     "description": "Engine fails during takeoff roll or initial climb"
   },
-    {
-      "name": "Power-Off Stall",
-      "type": "maneuver",
-      "description": "Demonstrate recognition and recovery from power-off stall"
-    },
-    {
-      "name": "Power-On Stall",
-      "type": "maneuver",
-      "description": "Demonstrate recognition and recovery from power-on stall"
-    },
-    {
-      "name": "Engine Fire in Flight",
-      "type": "emergency",
-      "description": "Engine fire during flight"
-    },
-    {
-      "name": "Electrical Fire",
-      "type": "emergency",
-      "description": "Electrical system fire"
-    },
-    {
-      "name": "Short Field Takeoff",
-      "type": "maneuver",
-      "description": "Maximum performance takeoff from a short field"
-    },
-    {
-      "name": "Short Field Landing",
-      "type": "maneuver",
-      "description": "Approach and landing on a short field"
-    },
-    {
-      "name": "Soft Field Takeoff",
-      "type": "maneuver",
-      "description": "Takeoff from a soft or rough field"
-    },
-    {
-      "name": "Soft Field Landing",
-      "type": "maneuver",
-      "description": "Landing on a soft or rough field"
-    },
-    {
-      "name": "Emergency Descent",
-      "type": "emergency",
-      "description": "Rapid descent to a lower altitude"
-    },
-    {
-      "name": "Steep Turns",
-      "type": "maneuver",
-      "description": "45-degree banked turns maintaining altitude"
-    },
-    {
-      "name": "Slow Flight",
-      "type": "maneuver",
-      "description": "Flight at minimum controllable airspeed"
-    },
-    {
-      "name": "Lost Procedures",
-      "type": "emergency",
-      "description": "Actions when lost or uncertain of position"
-    },
-    {
-      "name": "Radio Communication Failure",
-      "type": "emergency",
-      "description": "Loss of radio communication capability"
-    },
-    {
-      "name": "Emergency Landing",
-      "type": "emergency",
-      "description": "Forced landing due to engine failure"
-    },
-    {
-      "name": "Go-Around",
-      "type": "maneuver",
-      "description": "Abort landing and return to traffic pattern"
-    },
-    {
-      "name": "Crosswind Landing",
-      "type": "maneuver",
-      "description": "Landing with significant crosswind component"
-    },
-    {
-      "name": "VOR Navigation",
-      "type": "maneuver",
-      "description": "Navigate using VOR station"
-    },
-    {
-      "name": "Partial Panel Flight",
-      "type": "emergency",
-      "description": "Flight with simulated instrument failure"
-    },
-    {
-      "name": "Unusual Attitude Recovery",
-      "type": "emergency",
-      "description": "Recovery from unusual flight attitudes"
+  {
+    "name": "Power-Off Stall",
+    "type": "maneuver",
+    "description": "Demonstrate recognition and recovery from power-off stall"
+  },
+  {
+    "name": "Power-On Stall",
+    "type": "maneuver",
+    "description": "Demonstrate recognition and recovery from power-on stall"
+  },
+  {
+    "name": "Engine Fire in Flight",
+    "type": "emergency",
+    "description": "Engine fire during flight"
+  },
+  {
+    "name": "Electrical Fire",
+    "type": "emergency",
+    "description": "Electrical system fire"
+  },
+  {
+    "name": "Short Field Takeoff",
+    "type": "maneuver",
+    "description": "Maximum performance takeoff from a short field"
+  },
+  {
+    "name": "Short Field Landing",
+    "type": "maneuver",
+    "description": "Approach and landing on a short field"
+  },
+  {
+    "name": "Soft Field Takeoff",
+    "type": "maneuver",
+    "description": "Takeoff from a soft or rough field"
+  },
+  {
+    "name": "Soft Field Landing",
+    "type": "maneuver",
+    "description": "Landing on a soft or rough field"
+  },
+  {
+    "name": "Emergency Descent",
+    "type": "emergency",
+    "description": "Rapid descent to a lower altitude"
+  },
+  {
+    "name": "Steep Turns",
+    "type": "maneuver",
+    "description": "45-degree banked turns maintaining altitude"
+  },
+  {
+    "name": "Slow Flight",
+    "type": "maneuver",
+    "description": "Flight at minimum controllable airspeed"
+  },
+  {
+    "name": "Lost Procedures",
+    "type": "emergency",
+    "description": "Actions when lost or uncertain of position"
+  },
+  {
+    "name": "Radio Communication Failure",
+    "type": "emergency",
+    "description": "Loss of radio communication capability"
+  },
+  {
+    "name": "Emergency Landing",
+    "type": "emergency",
+    "description": "Forced landing due to engine failure"
+  },
+  {
+    "name": "Go-Around",
+    "type": "maneuver",
+    "description": "Abort landing and return to traffic pattern"
+  },
+  {
+    "name": "Crosswind Landing",
+    "type": "maneuver",
+    "description": "Landing with significant crosswind component"
+  },
+  {
+    "name": "VOR Navigation",
+    "type": "maneuver",
+    "description": "Navigate using VOR station"
+  },
+  {
+    "name": "Partial Panel Flight",
+    "type": "emergency",
+    "description": "Flight with simulated instrument failure"
+  },
+  {
+    "name": "Unusual Attitude Recovery",
+    "type": "emergency",
+    "description": "Recovery from unusual flight attitudes"
+  },
+  {
+    "name": "Chandelles",
+    "type": "maneuver",
+    "description": "Maximum performance climbing turn"
+  },
+  {
+    "name": "Lazy Eights",
+    "type": "maneuver",
+    "description": "Series of climbing and descending turns"
   }
 ]

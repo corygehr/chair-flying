@@ -36,7 +36,7 @@ class ManeuverTracker:
         with open(self.history_file, 'w') as f:
             json.dump(self.history, f, indent=2)
     
-    def record_maneuver(self, maneuver: Dict, status: str):
+    def record_maneuver(self, maneuver: Dict, status: str, phase: Optional[Dict] = None):
         """Record a maneuver attempt with timestamp and status."""
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -44,12 +44,14 @@ class ManeuverTracker:
             "type": maneuver.get("type", "normal"),
             "status": status
         }
+        if phase:
+            entry["phase"] = phase["name"]
         self.history.append(entry)
         self.save_history()
     
     def get_follow_ups(self) -> List[Dict]:
-        """Get list of maneuvers marked for follow-up."""
-        return [entry for entry in self.history if entry["status"] == "follow-up"]
+        """Get list of maneuvers marked for review."""
+        return [entry for entry in self.history if entry["status"] == "review"]
 
 
 class ChairFlying:
@@ -99,6 +101,9 @@ class ChairFlying:
         config.setdefault("show_maneuver_type", True)
         config.setdefault("show_maneuver_description", True)
         
+        # Set default value for excluding emergencies
+        config.setdefault("exclude_emergencies", False)
+        
         return config
     
     def load_maneuvers(self) -> List[Dict]:
@@ -120,6 +125,17 @@ class ChairFlying:
         if not maneuvers:
             raise ValueError("Maneuvers file must contain at least one maneuver")
         
+        # Filter out emergencies if configured to exclude them
+        if self.config.get("exclude_emergencies", False):
+            maneuvers = [m for m in maneuvers if m.get("type", "").lower() != "emergency"]
+            
+            # Ensure we still have maneuvers after filtering
+            if not maneuvers:
+                raise ValueError(
+                    "No maneuvers available after excluding emergencies. "
+                    "Please add non-emergency maneuvers or disable 'exclude_emergencies'."
+                )
+        
         return maneuvers
     
     def get_random_interval(self) -> int:
@@ -134,7 +150,13 @@ class ChairFlying:
             raise ValueError("No maneuvers configured!")
         return random.choice(self.maneuvers)
     
-    def display_maneuver(self, maneuver: Dict):
+    def select_phase(self, maneuver: Dict) -> Optional[Dict]:
+        """Select a random phase from the maneuver's phases."""
+        if "phases" not in maneuver or not maneuver["phases"]:
+            return None
+        return random.choice(maneuver["phases"])
+    
+    def display_maneuver(self, maneuver: Dict, phase: Optional[Dict] = None):
         """Display maneuver information to the user."""
         print("\n" + "=" * 60)
         print(f"MANEUVER: {maneuver['name']}")
@@ -147,23 +169,44 @@ class ChairFlying:
         if self.config.get("show_maneuver_description", True) and "description" in maneuver:
             print(f"Description: {maneuver['description']}")
         
+        # Show phase information if provided
+        if phase:
+            print(f"\nPHASE: {phase['name']}")
+            if self.config.get("show_maneuver_description", True) and "description" in phase:
+                print(f"Phase Description: {phase['description']}")
+        
         print("=" * 60)
     
-    def get_user_response(self) -> str:
-        """Get user response for maneuver completion."""
+    def get_user_response(self, show_next: bool = False, show_complete: bool = True) -> str:
+        """Get user response for maneuver completion.
+        
+        Args:
+            show_next: If True, shows [n] Next instead of [c] Completed
+            show_complete: If True, shows [c] Completed (only used when show_next is False)
+        """
         while True:
             print("\nOptions:")
-            print("  [c] Completed")
-            print("  [f] Follow-up needed")
+            if show_next:
+                print("  [n] Next")
+            elif show_complete:
+                print("  [c] Completed")
+            print("  [f] Mark for review")
             print("  [s] Skip (no recording)")
             print("  [q] Quit")
             
             response = input("\nYour response: ").strip().lower()
             
-            if response in ['c', 'f', 's', 'q']:
+            valid_responses = ['f', 's', 'q']
+            if show_next:
+                valid_responses.append('n')
+            elif show_complete:
+                valid_responses.append('c')
+            
+            if response in valid_responses:
                 return response
             else:
-                print("Invalid input. Please choose c, f, s, or q.")
+                options = ", ".join(valid_responses)
+                print(f"Invalid input. Please choose {options}.")
     
     def wait_with_countdown(self, interval: int):
         """Wait for the specified interval with a countdown or progress indicator."""
@@ -190,19 +233,58 @@ class ChairFlying:
             sys.stdout.write("\r" + " " * 50 + "\r")  # Clear the line
             sys.stdout.flush()
     
+    def show_config_summary(self):
+        """Display a summary of all configuration options."""
+        print("\nConfiguration Summary:")
+        print("-" * 60)
+        
+        # Maneuvers loaded
+        total_maneuvers = len(self.maneuvers)
+        emergency_count = sum(1 for m in self.maneuvers if m.get("type", "").lower() == "emergency")
+        non_emergency_count = total_maneuvers - emergency_count
+        
+        print(f"Maneuvers loaded: {total_maneuvers}")
+        print(f"  - Emergency maneuvers: {emergency_count}")
+        print(f"  - Standard maneuvers: {non_emergency_count}")
+        
+        # Emergency filtering
+        exclude_emergencies = self.config.get("exclude_emergencies", False)
+        if exclude_emergencies:
+            print(f"Emergency filtering: ENABLED (emergencies excluded)")
+        else:
+            print(f"Emergency filtering: DISABLED (all types included)")
+        
+        # Interval settings
+        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
+        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
+        print(f"Interval range: {min_interval}-{max_interval} seconds")
+        
+        # Display options
+        show_time = self.config.get("show_next_maneuver_time", True)
+        show_type = self.config.get("show_maneuver_type", True)
+        show_desc = self.config.get("show_maneuver_description", True)
+        
+        print(f"Display options:")
+        print(f"  - Show countdown timer: {'Yes' if show_time else 'No'}")
+        print(f"  - Show maneuver type: {'Yes' if show_type else 'No'}")
+        print(f"  - Show descriptions: {'Yes' if show_desc else 'No'}")
+        
+        print("-" * 60)
+    
     def run(self):
         """Run the main chair flying loop."""
         print("=" * 60)
-        print("Chair Flying - Aviation Training Practice")
+        print("Chair Flying -  Checklist Memorization Aid")
         print("=" * 60)
-        print(f"\nLoaded {len(self.maneuvers)} maneuvers")
-        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
-        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
-        print(f"Interval: {min_interval}-{max_interval} seconds")
+        
+        # Display configuration summary
+        self.show_config_summary()
+        
         print("\nStarting practice session...")
         print("Press Ctrl+C to stop at any time.\n")
         
         try:
+            quit_requested = False
             while True:
                 # Wait for random interval with countdown or progress indicator
                 interval = self.get_random_interval()
@@ -210,25 +292,54 @@ class ChairFlying:
                 
                 # Select and display maneuver
                 maneuver = self.select_maneuver()
-                self.display_maneuver(maneuver)
+                current_phase = None
+                has_phases = "phases" in maneuver and maneuver["phases"]
                 
-                # Get user response
-                response = self.get_user_response()
+                # Inner loop for handling phases
+                while True:
+                    self.display_maneuver(maneuver, current_phase)
+                    
+                    # Determine what options to show
+                    # For multi-phase maneuvers without a phase selected, show "Next" instead of "Completed"
+                    # For single-phase maneuvers or when already in a phase, show "Completed"
+                    show_next = has_phases and current_phase is None
+                    show_complete = not show_next
+                    
+                    # Get user response
+                    response = self.get_user_response(show_next=show_next, show_complete=show_complete)
+                    
+                    if response == 'q':
+                        print("\nEnding practice session.")
+                        quit_requested = True
+                        break  # Exit inner loop
+                    elif response == 'n':
+                        # Select a random phase (only reachable if maneuver has phases)
+                        current_phase = self.select_phase(maneuver)
+                        if current_phase:
+                            print(f"\n→ Proceeding to next phase...")
+                            continue  # Show the phase
+                        else:
+                            # This should never happen if has_phases check is working correctly
+                            print("Error: No phases available. Proceeding to next maneuver.")
+                            break
+                    elif response == 'c':
+                        self.tracker.record_maneuver(maneuver, "completed", current_phase)
+                        print("✓ Marked as completed")
+                        break
+                    elif response == 'f':
+                        self.tracker.record_maneuver(maneuver, "review", current_phase)
+                        print("⚠ Marked for review")
+                        break
+                    elif response == 's':
+                        print("Skipped (not recorded)")
+                        break
                 
-                if response == 'q':
-                    print("\nEnding practice session. Good work!")
-                    break
-                elif response == 'c':
-                    self.tracker.record_maneuver(maneuver, "completed")
-                    print("✓ Marked as completed")
-                elif response == 'f':
-                    self.tracker.record_maneuver(maneuver, "follow-up")
-                    print("⚠ Marked for follow-up")
-                elif response == 's':
-                    print("Skipped (not recorded)")
+                # Check if user wants to quit
+                if quit_requested:
+                    break  # Exit outer loop
         
         except KeyboardInterrupt:
-            print("\n\nSession interrupted. Good work!")
+            print("\n\nSession interrupted.")
         
         # Show summary
         self.show_summary()
@@ -241,11 +352,11 @@ class ChairFlying:
         
         follow_ups = self.tracker.get_follow_ups()
         if follow_ups:
-            print(f"\nManeuvers marked for follow-up ({len(follow_ups)}):")
+            print(f"\nManeuvers marked for review ({len(follow_ups)}):")
             for entry in follow_ups:
                 print(f"  - {entry['maneuver']} ({entry['type']})")
         else:
-            print("\nNo maneuvers marked for follow-up. Great job!")
+            print("\nNo maneuvers marked for review.")
         
         print(f"\nTotal history entries: {len(self.tracker.history)}")
 

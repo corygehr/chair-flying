@@ -79,6 +79,7 @@ The maneuvers file is a JSON array:
 - `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
 - `show_maneuver_type`: Display the type of maneuver (optional, default: true)
 - `show_maneuver_description`: Display the maneuver description (optional, default: true)
+- `exclude_emergencies`: Exclude maneuvers with type "emergency" from practice sessions (optional, default: false)
 
 #### Maneuvers Configuration (`maneuvers.json`)
 
@@ -86,6 +87,42 @@ Each maneuver object in the array can have:
 - `name`: Name of the maneuver (required)
 - `type`: Category of maneuver (e.g., "emergency", "maneuver", "normal") (optional)
 - `description`: Description of the maneuver (optional)
+- `phases`: Array of phase objects for multi-phase maneuvers (optional)
+
+##### Multi-Phase Maneuvers
+
+Some maneuvers have multiple phases or variants. For example, an engine fire during startup may have different outcomes depending on whether the engine starts or not. Multi-phase maneuvers allow you to practice different scenarios within a single maneuver.
+
+To create a multi-phase maneuver, add a `phases` array:
+
+```json
+{
+  "name": "Engine Fire During Startup",
+  "type": "emergency",
+  "description": "Engine fire occurs during startup procedure",
+  "phases": [
+    {
+      "name": "Engine Starts",
+      "description": "Engine successfully starts despite the fire"
+    },
+    {
+      "name": "Engine Fails to Start",
+      "description": "Engine does not start"
+    }
+  ]
+}
+```
+
+Each phase object can have:
+- `name`: Name of the phase (required)
+- `description`: Description of the phase (optional)
+
+When practicing a multi-phase maneuver:
+1. The initial maneuver is displayed first
+2. Instead of `[c] Completed`, you'll see `[n] Next` to proceed to a random phase
+3. Selecting `[n]` randomly chooses and displays one of the available phases
+4. Once in a phase, the `[c] Completed` option appears
+5. After completing, skipping, or marking a phase for review, the application proceeds to wait for the next maneuver (you cannot go back to see other phases of the same maneuver in the same iteration)
 
 ## Usage
 
@@ -107,8 +144,9 @@ python chair_flying.py my_custom_config.json
 2. A maneuver will be displayed
 3. Perform the maneuver mentally ("chair fly" it)
 4. Choose an option:
-   - **[c]** Completed - Mark as successfully completed
-   - **[f]** Follow-up needed - Mark for additional practice
+   - **[c]** Completed - Mark as successfully completed (shown for single-phase maneuvers or when in a phase)
+   - **[n]** Next - Proceed to a randomly selected phase (shown for multi-phase maneuvers before selecting a phase)
+   - **[f]** Mark for review - Mark for additional practice
    - **[s]** Skip - Don't record this attempt
    - **[q]** Quit - End the session
 
@@ -135,7 +173,7 @@ Description: Engine fails during takeoff roll or initial climb
 
 Options:
   [c] Completed
-  [f] Follow-up needed
+  [f] Mark for review
   [s] Skip (no recording)
   [q] Quit
 
@@ -206,6 +244,17 @@ Then reference it in your config:
   "maneuvers_file": "emergency_maneuvers.json",
   "interval_min": 30,
   "interval_max": 120
+}
+```
+
+### Non-Emergency Maneuvers Only
+To practice only standard maneuvers and exclude emergencies:
+```json
+{
+  "maneuvers_file": "maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 120,
+  "exclude_emergencies": true
 }
 ```
 
