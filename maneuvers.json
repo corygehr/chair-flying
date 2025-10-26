@@ -108,7 +108,7 @@
     "description": "Loss of radio communication capability"
   },
   {
-    "name": "Emergency Landing",
+    "name": "Forced Landing",
     "type": "emergency",
     "description": "Forced landing due to engine failure"
   },
@@ -117,28 +117,6 @@
     "type": "maneuver",
     "kind": "private",
     "description": "Abort landing and return to traffic pattern"
-  },
-  {
-    "name": "Crosswind Landing",
-    "type": "maneuver",
-    "kind": "private",
-    "description": "Landing with significant crosswind component"
-  },
-  {
-    "name": "VOR Navigation",
-    "type": "maneuver",
-    "kind": "private",
-    "description": "Navigate using VOR station"
-  },
-  {
-    "name": "Partial Panel Flight",
-    "type": "emergency",
-    "description": "Flight with simulated instrument failure"
-  },
-  {
-    "name": "Unusual Attitude Recovery",
-    "type": "emergency",
-    "description": "Recovery from unusual flight attitudes"
   },
   {
     "name": "Chandelles",
