@@ -118,10 +118,10 @@ Each phase object can have:
 
 When practicing a multi-phase maneuver:
 1. The initial maneuver is displayed first
-2. An additional `[n] Next phase` option appears
+2. Instead of `[c] Completed`, you'll see `[n] Next` to proceed to a random phase
 3. Selecting `[n]` randomly chooses and displays one of the available phases
-4. Once in a phase, the `[n]` option is no longer shown
-5. After completing, skipping, or marking a phase for follow-up, the application proceeds to wait for the next maneuver (you cannot go back to see other phases of the same maneuver in the same iteration)
+4. Once in a phase, the `[c] Completed` option appears
+5. After completing, skipping, or marking a phase for review, the application proceeds to wait for the next maneuver (you cannot go back to see other phases of the same maneuver in the same iteration)
 
 ## Usage
 
@@ -143,10 +143,10 @@ python chair_flying.py my_custom_config.json
 2. A maneuver will be displayed
 3. Perform the maneuver mentally ("chair fly" it)
 4. Choose an option:
-   - **[c]** Completed - Mark as successfully completed
-   - **[f]** Follow-up needed - Mark for additional practice
+   - **[c]** Completed - Mark as successfully completed (shown for single-phase maneuvers or when in a phase)
+   - **[n]** Next - Proceed to a randomly selected phase (shown for multi-phase maneuvers before selecting a phase)
+   - **[f]** Mark for review - Mark for additional practice
    - **[s]** Skip - Don't record this attempt
-   - **[n]** Next phase - (Only shown for multi-phase maneuvers) Proceed to a randomly selected phase
    - **[q]** Quit - End the session
 
 ### Example Session
@@ -172,7 +172,7 @@ Description: Engine fails during takeoff roll or initial climb
 
 Options:
   [c] Completed
-  [f] Follow-up needed
+  [f] Mark for review
   [s] Skip (no recording)
   [q] Quit
 

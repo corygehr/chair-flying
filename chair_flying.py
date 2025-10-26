@@ -50,8 +50,8 @@ class ManeuverTracker:
         self.save_history()
     
     def get_follow_ups(self) -> List[Dict]:
-        """Get list of maneuvers marked for follow-up."""
-        return [entry for entry in self.history if entry["status"] == "follow-up"]
+        """Get list of maneuvers marked for review."""
+        return [entry for entry in self.history if entry["status"] == "review"]
 
 
 class ChairFlying:
@@ -163,22 +163,30 @@ class ChairFlying:
         
         print("=" * 60)
     
-    def get_user_response(self, has_phases: bool = False) -> str:
-        """Get user response for maneuver completion."""
+    def get_user_response(self, show_next: bool = False, show_complete: bool = True) -> str:
+        """Get user response for maneuver completion.
+        
+        Args:
+            show_next: If True, shows [n] Next instead of [c] Completed
+            show_complete: If True, shows [c] Completed (only used when show_next is False)
+        """
         while True:
             print("\nOptions:")
-            print("  [c] Completed")
-            print("  [f] Follow-up needed")
+            if show_next:
+                print("  [n] Next")
+            elif show_complete:
+                print("  [c] Completed")
+            print("  [f] Mark for review")
             print("  [s] Skip (no recording)")
-            if has_phases:
-                print("  [n] Next phase")
             print("  [q] Quit")
             
             response = input("\nYour response: ").strip().lower()
             
-            valid_responses = ['c', 'f', 's', 'q']
-            if has_phases:
+            valid_responses = ['f', 's', 'q']
+            if show_next:
                 valid_responses.append('n')
+            elif show_complete:
+                valid_responses.append('c')
             
             if response in valid_responses:
                 return response
@@ -238,12 +246,14 @@ class ChairFlying:
                 while True:
                     self.display_maneuver(maneuver, current_phase)
                     
-                    # Determine if we should show the "next phase" option
-                    # Only show it when maneuver has phases and we haven't selected one yet
-                    show_next_phase_option = has_phases and current_phase is None
+                    # Determine what options to show
+                    # For multi-phase maneuvers without a phase selected, show "Next" instead of "Completed"
+                    # For single-phase maneuvers or when already in a phase, show "Completed"
+                    show_next = has_phases and current_phase is None
+                    show_complete = not show_next
                     
                     # Get user response
-                    response = self.get_user_response(show_next_phase_option)
+                    response = self.get_user_response(show_next=show_next, show_complete=show_complete)
                     
                     if response == 'q':
                         print("\nEnding practice session. Good work!")
@@ -263,8 +273,8 @@ class ChairFlying:
                         print("✓ Marked as completed")
                         break
                     elif response == 'f':
-                        self.tracker.record_maneuver(maneuver, "follow-up", current_phase)
-                        print("⚠ Marked for follow-up")
+                        self.tracker.record_maneuver(maneuver, "review", current_phase)
+                        print("⚠ Marked for review")
                         break
                     elif response == 's':
                         print("Skipped (not recorded)")
@@ -284,11 +294,11 @@ class ChairFlying:
         
         follow_ups = self.tracker.get_follow_ups()
         if follow_ups:
-            print(f"\nManeuvers marked for follow-up ({len(follow_ups)}):")
+            print(f"\nManeuvers marked for review ({len(follow_ups)}):")
             for entry in follow_ups:
                 print(f"  - {entry['maneuver']} ({entry['type']})")
         else:
-            print("\nNo maneuvers marked for follow-up. Great job!")
+            print("\nNo maneuvers marked for review. Great job!")
         
         print(f"\nTotal history entries: {len(self.tracker.history)}")
 
