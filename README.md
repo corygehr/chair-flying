@@ -48,13 +48,7 @@ Create a `config.json` file with your application settings:
 
 ### 2. Maneuvers List (`maneuvers.json`)
 
-Create a `maneuvers.json` file with your maneuvers. You can use the provided `example_maneuvers.json` as a template:
-
-```bash
-cp example_maneuvers.json maneuvers.json
-```
-
-The maneuvers file is a JSON array:
+Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON array:
 
 ```json
 [
