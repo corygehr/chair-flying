@@ -167,6 +167,6 @@
   {
     "name": "Wing Fire",
     "type": "emergency",
-    "description": "Fire on the aircraft's wing"
+    "description": "Fire involving the wing structure (not wing-mounted engine)"
   }
 ]
