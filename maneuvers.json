@@ -156,17 +156,17 @@
   },
   {
     "name": "Icing During Flight",
-    "kind": "emergency",
+    "type": "emergency",
     "description": "Encountering and managing airframe icing conditions"
   },
   {
     "name": "Static Port Icing",
-    "kind": "emergency",
+    "type": "emergency",
     "description": "Managing blocked static port conditions"
   },
   {
     "name": "Wing Fire",
-    "kind": "emergency",
+    "type": "emergency",
     "description": "Fire on the aircraft's wing"
   }
 ]
