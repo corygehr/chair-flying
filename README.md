@@ -164,6 +164,7 @@ python chair_flying.py my_custom_config.json
    - **[n]** Next - Proceed to a randomly selected phase (shown for multi-phase maneuvers before selecting a phase)
    - **[f]** Mark for review - Mark for additional practice
    - **[s]** Skip - Don't record this attempt
+   - **[p]** Permanently skip - Remove this maneuver from the session rotation (requires confirmation)
    - **[q]** Quit - End the session
 
 ### Example Session
@@ -217,11 +218,23 @@ Options:
   [c] Completed
   [f] Mark for review
   [s] Skip (no recording)
+  [p] Permanently skip (remove from session)
   [q] Quit
 
 Your response: c
 ✓ Marked as completed
 ```
+
+### Permanently Skipping Maneuvers
+
+If you encounter a maneuver that you're not ready to practice or want to exclude from the current session, you can permanently skip it:
+
+1. When a maneuver is displayed, select `[p]` for "Permanently skip"
+2. You'll be prompted to confirm: "Are you sure you want to permanently skip '[maneuver name]' for this session?"
+3. If you confirm with `y`, the maneuver will be removed from the rotation for the remainder of the session
+4. If you cancel with `n`, the maneuver will be displayed again with all options available
+
+**Note:** Permanently skipped maneuvers are only removed for the current session. When you restart the application, all maneuvers will be available again.
 
 ## Session History
 

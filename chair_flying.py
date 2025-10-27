@@ -69,6 +69,7 @@ class ChairFlying:
         self.tracker = ManeuverTracker()
         self.include_emergencies = None
         self.maneuver_kind = None
+        self.skipped_maneuvers = []  # Track permanently skipped maneuvers for the session
     
     def load_config(self) -> Dict:
         """Load application configuration from JSON file."""
@@ -256,11 +257,12 @@ class ChairFlying:
                 print("  [c] Completed")
             print("  [f] Mark for review")
             print("  [s] Skip (no recording)")
+            print("  [p] Permanently skip (remove from session)")
             print("  [q] Quit")
             
             response = input("\nYour response: ").strip().lower()
             
-            valid_responses = ['f', 's', 'q']
+            valid_responses = ['f', 's', 'p', 'q']
             if show_next:
                 valid_responses.append('n')
             elif show_complete:
@@ -271,6 +273,49 @@ class ChairFlying:
             else:
                 options = ", ".join(valid_responses)
                 print(f"Invalid input. Please choose {options}.")
+    
+    def confirm_permanent_skip(self, maneuver: Dict) -> bool:
+        """Prompt user to confirm permanent skip of a maneuver.
+        
+        Args:
+            maneuver: The maneuver to confirm skipping
+            
+        Returns:
+            bool: True if user confirms, False otherwise
+        """
+        print(f"\n⚠️  Are you sure you want to permanently skip '{maneuver['name']}' for this session?")
+        print("This maneuver will not appear again until you restart the application.")
+        
+        while True:
+            response = input("Confirm (y/n): ").strip().lower()
+            if response in ['y', 'yes']:
+                return True
+            elif response in ['n', 'no']:
+                return False
+            else:
+                print("Invalid input. Please enter 'y' or 'n'.")
+    
+    def permanently_skip_maneuver(self, maneuver: Dict):
+        """Permanently skip a maneuver for the current session.
+        
+        Args:
+            maneuver: The maneuver to permanently skip
+        """
+        # Add to skipped list
+        self.skipped_maneuvers.append(maneuver)
+        
+        # Remove from active maneuvers list
+        self.maneuvers = [m for m in self.maneuvers if m != maneuver]
+        
+        print(f"✗ '{maneuver['name']}' has been permanently removed from this session.")
+        
+        # Check if any maneuvers remain
+        if not self.maneuvers:
+            print("\n⚠️  No maneuvers remaining in the rotation!")
+            return False
+        else:
+            print(f"({len(self.maneuvers)} maneuver(s) remaining)")
+            return True
     
     def wait_with_countdown(self, interval: int):
         """Wait for the specified interval with a countdown or progress indicator."""
@@ -421,6 +466,19 @@ class ChairFlying:
                     elif response == 's':
                         print("Skipped (not recorded)")
                         break
+                    elif response == 'p':
+                        # Permanently skip this maneuver
+                        if self.confirm_permanent_skip(maneuver):
+                            has_maneuvers = self.permanently_skip_maneuver(maneuver)
+                            if not has_maneuvers:
+                                # No more maneuvers, end session
+                                print("\nEnding practice session - no maneuvers remaining.")
+                                quit_requested = True
+                            break  # Exit inner loop
+                        else:
+                            # User cancelled, show the maneuver again
+                            print("Permanent skip cancelled.")
+                            continue
                 
                 # Check if user wants to quit
                 if quit_requested:
