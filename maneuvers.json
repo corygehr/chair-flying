@@ -30,9 +30,14 @@
     ]
   },
   {
-    "name": "Engine Failure on Takeoff",
+    "name": "Engine Failure During Takeoff Roll",
     "type": "emergency",
-    "description": "Engine fails during takeoff roll or initial climb"
+    "description": "Engine fails during takeoff roll"
+  },
+  {
+    "name": "Engine Failure Immediately After Liftoff",
+    "type": "emergency",
+    "description": "Engine fails just after liftoff, with room to land on the runway"
   },
   {
     "name": "Power-Off Stall",
@@ -98,11 +103,6 @@
     "description": "Flight at minimum controllable airspeed"
   },
   {
-    "name": "Lost Procedures",
-    "type": "emergency",
-    "description": "Actions when lost or uncertain of position"
-  },
-  {
     "name": "Radio Communication Failure",
     "type": "emergency",
     "description": "Loss of radio communication capability"
@@ -153,5 +153,20 @@
     "type": "maneuver",
     "kind": "commercial",
     "description": "Maintain visual reference to two ground points while maneuvering"
+  },
+  {
+    "name": "Icing During Flight",
+    "kind": "emergency",
+    "description": "Encountering and managing airframe icing conditions"
+  },
+  {
+    "name": "Static Port Icing",
+    "kind": "emergency",
+    "description": "Managing blocked static port conditions"
+  },
+  {
+    "name": "Wing Fire",
+    "kind": "emergency",
+    "description": "Fire on the aircraft's wing"
   }
 ]
