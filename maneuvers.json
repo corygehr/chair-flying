@@ -141,5 +141,17 @@
     "type": "maneuver",
     "kind": "commercial",
     "description": "50-degree banked turns maintaining altitude"
+  },
+  {
+    "name": "Accelerated Stall",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "Recognition and recovery from stall during a turn at a higher airspeed"
+  },
+  {
+    "name": "Eights on Pylons",
+    "type": "maneuver",
+    "kind": "commercial",
+    "description": "Maintain visual reference to two ground points while maneuvering"
   }
 ]
