@@ -1,0 +1,105 @@
+===============================================================================
+CHAIR FLYING - SIMPLE INSTALLATION INSTRUCTIONS
+===============================================================================
+
+Welcome! This guide will help you get started in 3 easy steps.
+
+===============================================================================
+STEP 1: Install Python
+===============================================================================
+
+Visit: https://www.python.org/downloads/
+
+1. Click the big yellow "Download Python" button
+2. Run the installer
+3. IMPORTANT: On Windows, check "Add Python to PATH" during installation
+4. Click "Install Now"
+
+===============================================================================
+STEP 2: Download Chair Flying
+===============================================================================
+
+Visit: https://github.com/corygehr/chair-flying
+
+1. Click the green "Code" button
+2. Click "Download ZIP"
+3. Extract the ZIP to a folder (e.g., Documents/chair-flying)
+
+===============================================================================
+STEP 3: Run Chair Flying
+===============================================================================
+
+WINDOWS:
+  - Open the chair-flying folder
+  - Double-click: run_chair_flying.bat
+
+MACOS/LINUX:
+  - Open the chair-flying folder
+  - Double-click: run_chair_flying.sh
+    (On macOS, right-click and select "Open With" > "Terminal")
+
+ALTERNATIVE (All platforms):
+  - Open Terminal (macOS/Linux) or Command Prompt (Windows)
+  - Navigate to the chair-flying folder
+  - Windows: type "python chair_flying.py" and press Enter
+  - Mac/Linux: type "python3 chair_flying.py" and press Enter
+
+===============================================================================
+VERIFY SETUP (Optional)
+===============================================================================
+
+To check if everything is set up correctly:
+
+Windows:
+  python verify_setup.py
+
+macOS/Linux:
+  python3 verify_setup.py
+
+This will tell you if anything needs to be fixed.
+
+===============================================================================
+NEED HELP?
+===============================================================================
+
+For detailed instructions, see:
+  - QUICK_START.md (step-by-step guide with troubleshooting)
+  - README.md (full documentation)
+
+Common Issues:
+
+"Python is not installed"
+  → Install Python from python.org and make sure to add it to PATH
+
+"config.json not found"
+  → Make sure you're in the correct folder (should contain config.json)
+
+"Permission denied" (Mac/Linux)
+  → Open Terminal and run: chmod +x run_chair_flying.sh
+
+===============================================================================
+WHAT'S IN THE BOX?
+===============================================================================
+
+chair_flying.py          - Main program
+config.json              - Settings file
+maneuvers.json           - List of maneuvers to practice
+run_chair_flying.bat     - Windows launcher (double-click to run)
+run_chair_flying.sh      - Mac/Linux launcher (double-click to run)
+verify_setup.py          - Setup verification tool
+README.md                - Full documentation
+QUICK_START.md           - Detailed setup guide with troubleshooting
+
+===============================================================================
+QUICK TIPS
+===============================================================================
+
+- Start with the default settings (they work great!)
+- Press Ctrl+C to quit at any time
+- Edit config.json to change time intervals
+- Edit maneuvers.json to add your own maneuvers
+- Use verify_setup.py if something doesn't work
+
+Happy chair flying! ✈️
+
+===============================================================================
