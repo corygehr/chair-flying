@@ -14,6 +14,112 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
+class Configuration:
+    """Configuration class for Chair Flying application.
+    
+    Encapsulates all configuration parameters with validation and type safety.
+    """
+    
+    def __init__(self, config_dict: Dict):
+        """Initialize configuration from a dictionary.
+        
+        Args:
+            config_dict: Dictionary containing configuration parameters
+            
+        Raises:
+            ValueError: If configuration is invalid
+        """
+        self._validate_and_set(config_dict)
+    
+    def _validate_and_set(self, config: Dict):
+        """Validate and set configuration parameters.
+        
+        Args:
+            config: Dictionary containing configuration parameters
+            
+        Raises:
+            ValueError: If configuration is invalid
+        """
+        # Validate required fields
+        if "maneuvers_file" not in config:
+            raise ValueError("Configuration missing required key: maneuvers_file")
+        
+        self._maneuvers_file = config["maneuvers_file"]
+        
+        # Validate interval configuration - both or neither should be provided
+        has_min = "interval_min_sec" in config
+        has_max = "interval_max_sec" in config
+        
+        if has_min != has_max:
+            raise ValueError(
+                "Both interval_min_sec and interval_max_sec must be provided together, "
+                "or neither (for manual mode)"
+            )
+        
+        if has_min and has_max:
+            if config["interval_min_sec"] > config["interval_max_sec"]:
+                raise ValueError("interval_min_sec must be less than or equal to interval_max_sec")
+            self._interval_min_sec = config["interval_min_sec"]
+            self._interval_max_sec = config["interval_max_sec"]
+        else:
+            self._interval_min_sec = None
+            self._interval_max_sec = None
+        
+        # Set default values for display options
+        self._show_next_maneuver_time = config.get("show_next_maneuver_time", True)
+        self._show_maneuver_type = config.get("show_maneuver_type", True)
+        self._show_maneuver_description = config.get("show_maneuver_description", True)
+        
+        # Validate and set emergency_probability if provided
+        self._emergency_probability = None
+        if "emergency_probability" in config:
+            prob = config["emergency_probability"]
+            if not isinstance(prob, (int, float)):
+                raise ValueError("emergency_probability must be a number")
+            if prob < 0 or prob > 100:
+                raise ValueError("emergency_probability must be between 0 and 100")
+            self._emergency_probability = prob
+    
+    @property
+    def maneuvers_file(self) -> str:
+        """Get the maneuvers file path."""
+        return self._maneuvers_file
+    
+    @property
+    def interval_min_sec(self) -> Optional[int]:
+        """Get the minimum interval in seconds."""
+        return self._interval_min_sec
+    
+    @property
+    def interval_max_sec(self) -> Optional[int]:
+        """Get the maximum interval in seconds."""
+        return self._interval_max_sec
+    
+    @property
+    def show_next_maneuver_time(self) -> bool:
+        """Get whether to show next maneuver time."""
+        return self._show_next_maneuver_time
+    
+    @property
+    def show_maneuver_type(self) -> bool:
+        """Get whether to show maneuver type."""
+        return self._show_maneuver_type
+    
+    @property
+    def show_maneuver_description(self) -> bool:
+        """Get whether to show maneuver description."""
+        return self._show_maneuver_description
+    
+    @property
+    def emergency_probability(self) -> Optional[float]:
+        """Get the emergency probability."""
+        return self._emergency_probability
+    
+    def is_manual_mode(self) -> bool:
+        """Check if manual mode is enabled (no interval configuration)."""
+        return self._interval_min_sec is None and self._interval_max_sec is None
+
+
 class ManeuverTracker:
     """Tracks maneuver completion status and follow-ups."""
     
@@ -79,7 +185,7 @@ class ChairFlying:
         self.emergency_mode = None  # 'all' or 'random' (only for fixed-length sessions)
         self.completed_maneuvers = []  # Track completed maneuvers in fixed-length mode
     
-    def load_config(self) -> Dict:
+    def load_config(self) -> Configuration:
         """Load application configuration from JSON file."""
         if not self.config_file.exists():
             raise FileNotFoundError(
@@ -89,7 +195,7 @@ class ChairFlying:
         
         try:
             with open(self.config_file, 'r') as f:
-                config = json.load(f)
+                config_dict = json.load(f)
         except json.JSONDecodeError as e:
             raise ValueError(
                 f"Configuration file '{self.config_file}' contains invalid JSON: {e}"
@@ -99,42 +205,12 @@ class ChairFlying:
                 f"Error reading configuration file '{self.config_file}': {e}"
             )
         
-        # Validate configuration
-        if "maneuvers_file" not in config:
-            raise ValueError("Configuration missing required key: maneuvers_file")
-        
-        # Validate interval configuration - both or neither should be provided
-        has_min = "interval_min_sec" in config
-        has_max = "interval_max_sec" in config
-        
-        if has_min != has_max:
-            raise ValueError(
-                "Both interval_min_sec and interval_max_sec must be provided together, "
-                "or neither (for manual mode)"
-            )
-        
-        if has_min and has_max:
-            if config["interval_min_sec"] > config["interval_max_sec"]:
-                raise ValueError("interval_min_sec must be less than or equal to interval_max_sec")
-        
-        # Set default values for display options
-        config.setdefault("show_next_maneuver_time", True)
-        config.setdefault("show_maneuver_type", True)
-        config.setdefault("show_maneuver_description", True)
-        
-        # Validate emergency_probability if provided
-        if "emergency_probability" in config:
-            prob = config["emergency_probability"]
-            if not isinstance(prob, (int, float)):
-                raise ValueError("emergency_probability must be a number")
-            if prob < 0 or prob > 100:
-                raise ValueError("emergency_probability must be between 0 and 100")
-        
-        return config
+        # Create and return Configuration object (validation happens in constructor)
+        return Configuration(config_dict)
     
     def load_maneuvers(self) -> List[Dict]:
         """Load maneuvers from separate JSON file."""
-        maneuvers_file = Path(self.config["maneuvers_file"])
+        maneuvers_file = Path(self.config.maneuvers_file)
         
         if not maneuvers_file.exists():
             raise FileNotFoundError(
@@ -170,12 +246,12 @@ class ChairFlying:
     
     def is_manual_mode(self) -> bool:
         """Check if manual mode is enabled (no interval configuration)."""
-        return "interval_min_sec" not in self.config and "interval_max_sec" not in self.config
+        return self.config.is_manual_mode()
     
     def get_random_interval(self) -> int:
         """Get random interval between min and max from config."""
-        min_interval = self.config.get("interval_min_sec", self.DEFAULT_INTERVAL_MIN)
-        max_interval = self.config.get("interval_max_sec", self.DEFAULT_INTERVAL_MAX)
+        min_interval = self.config.interval_min_sec if self.config.interval_min_sec is not None else self.DEFAULT_INTERVAL_MIN
+        max_interval = self.config.interval_max_sec if self.config.interval_max_sec is not None else self.DEFAULT_INTERVAL_MAX
         return random.randint(min_interval, max_interval)
     
     def prompt_maneuver_kind(self) -> str:
@@ -316,11 +392,11 @@ class ChairFlying:
         
         # For fixed sessions with all emergencies mode, or no probability configured
         if (self.session_mode == 'fixed' and self.emergency_mode == 'all') or \
-           self.config.get("emergency_probability") is None:
+           self.config.emergency_probability is None:
             return random.choice(available)
         
         # Use weighted selection based on emergency_probability
-        return self._select_with_probability(available, self.config["emergency_probability"])
+        return self._select_with_probability(available, self.config.emergency_probability)
     
     def _select_with_probability(self, maneuvers: List[Dict], emergency_prob: float) -> Dict:
         """Select a maneuver using weighted probability for emergencies.
@@ -357,17 +433,17 @@ class ChairFlying:
         print(f"MANEUVER: {maneuver['name']}")
         
         # Show type if configured
-        if self.config.get("show_maneuver_type", True):
+        if self.config.show_maneuver_type:
             print(f"Type: {maneuver.get('type', 'normal').upper()}")
         
         # Show description if configured and available
-        if self.config.get("show_maneuver_description", True) and "description" in maneuver:
+        if self.config.show_maneuver_description and "description" in maneuver:
             print(f"Description: {maneuver['description']}")
         
         # Show phase information if provided
         if phase:
             print(f"\nPHASE: {phase['name']}")
-            if self.config.get("show_maneuver_description", True) and "description" in phase:
+            if self.config.show_maneuver_description and "description" in phase:
                 print(f"Phase Description: {phase['description']}")
         
         print("=" * 60)
@@ -454,7 +530,7 @@ class ChairFlying:
     
     def wait_with_countdown(self, interval: int):
         """Wait for the specified interval with a countdown or progress indicator."""
-        show_countdown = self.config.get("show_next_maneuver_time", True)
+        show_countdown = self.config.show_next_maneuver_time
         
         if show_countdown:
             # Show countdown timer
@@ -533,25 +609,20 @@ class ChairFlying:
         if self.is_manual_mode():
             print(f"Timing mode: Manual (user-prompted)")
         else:
-            min_interval = self.config.get("interval_min_sec", self.DEFAULT_INTERVAL_MIN)
-            max_interval = self.config.get("interval_max_sec", self.DEFAULT_INTERVAL_MAX)
+            min_interval = self.config.interval_min_sec if self.config.interval_min_sec is not None else self.DEFAULT_INTERVAL_MIN
+            max_interval = self.config.interval_max_sec if self.config.interval_max_sec is not None else self.DEFAULT_INTERVAL_MAX
             print(f"Timing mode: Automatic")
             print(f"Interval range: {min_interval}-{max_interval} seconds")
         
         # Emergency probability setting
-        emergency_prob = self.config.get("emergency_probability")
-        if emergency_prob is not None:
-            print(f"Emergency probability: {emergency_prob}%")
+        if self.config.emergency_probability is not None:
+            print(f"Emergency probability: {self.config.emergency_probability}%")
         
         # Display options
-        show_time = self.config.get("show_next_maneuver_time", True)
-        show_type = self.config.get("show_maneuver_type", True)
-        show_desc = self.config.get("show_maneuver_description", True)
-        
         print(f"Display options:")
-        print(f"  - Show countdown timer: {'Yes' if show_time else 'No'}")
-        print(f"  - Show maneuver type: {'Yes' if show_type else 'No'}")
-        print(f"  - Show descriptions: {'Yes' if show_desc else 'No'}")
+        print(f"  - Show countdown timer: {'Yes' if self.config.show_next_maneuver_time else 'No'}")
+        print(f"  - Show maneuver type: {'Yes' if self.config.show_maneuver_type else 'No'}")
+        print(f"  - Show descriptions: {'Yes' if self.config.show_maneuver_description else 'No'}")
         
         print("-" * 60)
     
