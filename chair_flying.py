@@ -105,6 +105,14 @@ class ChairFlying:
         config.setdefault("show_maneuver_type", True)
         config.setdefault("show_maneuver_description", True)
         
+        # Validate emergency_probability if provided
+        if "emergency_probability" in config:
+            prob = config["emergency_probability"]
+            if not isinstance(prob, (int, float)):
+                raise ValueError("emergency_probability must be a number")
+            if prob < 0 or prob > 100:
+                raise ValueError("emergency_probability must be between 0 and 100")
+        
         return config
     
     def load_maneuvers(self) -> List[Dict]:
@@ -210,10 +218,34 @@ class ChairFlying:
         self.maneuvers = filtered
     
     def select_maneuver(self) -> Dict:
-        """Select a random maneuver from the maneuvers list."""
+        """Select a random maneuver from the maneuvers list.
+        
+        If emergency_probability is configured, uses weighted selection to control
+        how often emergency maneuvers appear. Otherwise, uses pure random selection.
+        """
         if not self.maneuvers:
             raise ValueError("No maneuvers configured!")
-        return random.choice(self.maneuvers)
+        
+        # Check if emergency_probability is configured
+        emergency_prob = self.config.get("emergency_probability")
+        
+        # If no probability configured, use standard random selection
+        if emergency_prob is None:
+            return random.choice(self.maneuvers)
+        
+        # Separate emergency and non-emergency maneuvers
+        emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() == "emergency"]
+        non_emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() != "emergency"]
+        
+        # If no emergencies or no non-emergencies, fall back to random selection
+        if not emergency_maneuvers or not non_emergency_maneuvers:
+            return random.choice(self.maneuvers)
+        
+        # Use probability to determine whether to select an emergency
+        if random.random() * 100 < emergency_prob:
+            return random.choice(emergency_maneuvers)
+        else:
+            return random.choice(non_emergency_maneuvers)
     
     def select_phase(self, maneuver: Dict) -> Optional[Dict]:
         """Select a random phase from the maneuver's phases."""
@@ -375,6 +407,11 @@ class ChairFlying:
         min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
         max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
         print(f"Interval range: {min_interval}-{max_interval} seconds")
+        
+        # Emergency probability setting
+        emergency_prob = self.config.get("emergency_probability")
+        if emergency_prob is not None:
+            print(f"Emergency probability: {emergency_prob}%")
         
         # Display options
         show_time = self.config.get("show_next_maneuver_time", True)
