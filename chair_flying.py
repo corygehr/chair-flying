@@ -93,7 +93,7 @@ class ChairFlying:
         if has_min != has_max:
             raise ValueError(
                 "Both interval_min and interval_max must be provided together, "
-                "or neither (to use defaults)"
+                "or neither (for manual mode)"
             )
         
         if has_min and has_max:
@@ -135,6 +135,10 @@ class ChairFlying:
             raise ValueError("Maneuvers file must contain at least one maneuver")
         
         return maneuvers
+    
+    def is_manual_mode(self) -> bool:
+        """Check if manual mode is enabled (no interval configuration)."""
+        return "interval_min" not in self.config and "interval_max" not in self.config
     
     def get_random_interval(self) -> int:
         """Get random interval between min and max from config."""
@@ -349,6 +353,11 @@ class ChairFlying:
             print(f"({len(self.maneuvers)} maneuver(s) remaining)")
             return True
     
+    def wait_for_user_ready(self):
+        """Wait for user to indicate they're ready for the next maneuver."""
+        print("\nPress Enter when ready for the next maneuver...")
+        input()
+    
     def wait_with_countdown(self, interval: int):
         """Wait for the specified interval with a countdown or progress indicator."""
         show_countdown = self.config.get("show_next_maneuver_time", True)
@@ -404,9 +413,13 @@ class ChairFlying:
             print(f"Emergency scenarios: {emergencies_display}")
         
         # Interval settings
-        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
-        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
-        print(f"Interval range: {min_interval}-{max_interval} seconds")
+        if self.is_manual_mode():
+            print(f"Timing mode: Manual (user-prompted)")
+        else:
+            min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
+            max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
+            print(f"Timing mode: Automatic")
+            print(f"Interval range: {min_interval}-{max_interval} seconds")
         
         # Emergency probability setting
         emergency_prob = self.config.get("emergency_probability")
@@ -456,9 +469,12 @@ class ChairFlying:
         try:
             quit_requested = False
             while True:
-                # Wait for random interval with countdown or progress indicator
-                interval = self.get_random_interval()
-                self.wait_with_countdown(interval)
+                # Wait for next maneuver - either with timer or user prompt
+                if self.is_manual_mode():
+                    self.wait_for_user_ready()
+                else:
+                    interval = self.get_random_interval()
+                    self.wait_with_countdown(interval)
                 
                 # Select and display maneuver
                 maneuver = self.select_maneuver()
