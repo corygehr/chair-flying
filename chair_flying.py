@@ -70,6 +70,9 @@ class ChairFlying:
         self.include_emergencies = None
         self.maneuver_kind = None
         self.skipped_maneuvers = []  # Track permanently skipped maneuvers for the session
+        self.session_mode = None  # 'indefinite' or 'fixed'
+        self.emergency_mode = None  # 'all' or 'random' (only for fixed-length sessions)
+        self.completed_maneuvers = []  # Track completed maneuvers in fixed-length mode
     
     def load_config(self) -> Dict:
         """Load application configuration from JSON file."""
@@ -168,6 +171,26 @@ class ChairFlying:
             else:
                 print("Invalid choice. Please select p, c, e, a, or press Enter for all.")
     
+    def prompt_session_mode(self) -> str:
+        """Prompt user to select session mode.
+        
+        Returns:
+            str: 'indefinite' or 'fixed'
+        """
+        print("\nHow would you like to structure your session?")
+        print("  [i] Indefinite - Practice maneuvers randomly (default)")
+        print("  [f] Fixed-length - Practice each maneuver once")
+        
+        while True:
+            response = input("\nYour choice (i/f or Enter for indefinite): ").strip().lower()
+            
+            if response == '' or response == 'i' or response == 'indefinite':
+                return 'indefinite'
+            elif response == 'f' or response == 'fixed':
+                return 'fixed'
+            else:
+                print("Invalid choice. Please select i, f, or press Enter for indefinite.")
+    
     def prompt_include_emergencies(self) -> bool:
         """Prompt user whether to include emergency scenarios.
         
@@ -187,6 +210,26 @@ class ChairFlying:
                 return False
             else:
                 print("Invalid choice. Please select y, n, or press Enter for yes.")
+    
+    def prompt_emergency_mode(self) -> str:
+        """Prompt user how emergencies should appear in fixed-length sessions.
+        
+        Returns:
+            str: 'all' to include all emergencies, 'random' for probability-based
+        """
+        print("\nHow should emergencies appear in the session?")
+        print("  [a] All emergencies - Every emergency will appear (default)")
+        print("  [r] Random emergencies - Based on configured probability")
+        
+        while True:
+            response = input("\nYour choice (a/r or Enter for all): ").strip().lower()
+            
+            if response == '' or response == 'a' or response == 'all':
+                return 'all'
+            elif response == 'r' or response == 'random':
+                return 'random'
+            else:
+                print("Invalid choice. Please select a, r, or press Enter for all.")
     
     def filter_maneuvers(self):
         """Filter maneuvers based on user preferences."""
@@ -220,12 +263,46 @@ class ChairFlying:
     def select_maneuver(self) -> Dict:
         """Select a random maneuver from the maneuvers list.
         
-        If emergency_probability is configured, uses weighted selection to control
-        how often emergency maneuvers appear. Otherwise, uses pure random selection.
+        For indefinite sessions or fixed sessions with random emergencies:
+        - If emergency_probability is configured, uses weighted selection
+        - Otherwise, uses pure random selection
+        
+        For fixed-length sessions with all emergencies:
+        - Selects from maneuvers not yet completed
         """
         if not self.maneuvers:
             raise ValueError("No maneuvers configured!")
         
+        # For fixed-length sessions, select from uncompleted maneuvers
+        if self.session_mode == 'fixed':
+            available_maneuvers = [m for m in self.maneuvers if m not in self.completed_maneuvers]
+            if not available_maneuvers:
+                return None  # All maneuvers completed
+            
+            # For fixed sessions with all emergencies mode, just pick randomly from available
+            if self.emergency_mode == 'all':
+                return random.choice(available_maneuvers)
+            
+            # For random emergency mode in fixed sessions, use probability if configured
+            emergency_prob = self.config.get("emergency_probability")
+            if emergency_prob is None:
+                return random.choice(available_maneuvers)
+            
+            # Separate available emergency and non-emergency maneuvers
+            available_emergency = [m for m in available_maneuvers if m.get("type", "").lower() == "emergency"]
+            available_non_emergency = [m for m in available_maneuvers if m.get("type", "").lower() != "emergency"]
+            
+            # If no emergencies or no non-emergencies, fall back to random selection
+            if not available_emergency or not available_non_emergency:
+                return random.choice(available_maneuvers)
+            
+            # Use probability to determine whether to select an emergency
+            if random.random() < emergency_prob / 100:
+                return random.choice(available_emergency)
+            else:
+                return random.choice(available_non_emergency)
+        
+        # For indefinite sessions, use the original logic
         # Check if emergency_probability is configured
         emergency_prob = self.config.get("emergency_probability")
         
@@ -374,6 +451,15 @@ class ChairFlying:
             sys.stdout.write("\r" + " " * 50 + "\r")  # Clear the line
             sys.stdout.flush()
     
+    def mark_maneuver_completed(self, maneuver: Dict):
+        """Mark a maneuver as completed in fixed-length mode.
+        
+        Args:
+            maneuver: The maneuver to mark as completed
+        """
+        if self.session_mode == 'fixed' and maneuver not in self.completed_maneuvers:
+            self.completed_maneuvers.append(maneuver)
+    
     def show_config_summary(self):
         """Display a summary of all configuration options."""
         print("\nConfiguration Summary:")
@@ -403,6 +489,13 @@ class ChairFlying:
         if self.maneuver_kind != 'emergency':
             print(f"Emergency scenarios: {emergencies_display}")
         
+        # Session mode
+        session_display = "Indefinite (random)" if self.session_mode == 'indefinite' else "Fixed-length (each once)"
+        print(f"Session mode: {session_display}")
+        if self.session_mode == 'fixed' and self.include_emergencies:
+            emergency_mode_display = "All will appear" if self.emergency_mode == 'all' else "Random (probability-based)"
+            print(f"  Emergency behavior: {emergency_mode_display}")
+        
         # Interval settings
         min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
         max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
@@ -431,6 +524,9 @@ class ChairFlying:
         print("Chair Flying -  Checklist Memorization Aid")
         print("=" * 60)
         
+        # Prompt user for session mode
+        self.session_mode = self.prompt_session_mode()
+        
         # Prompt user for preferences
         self.maneuver_kind = self.prompt_maneuver_kind()
         
@@ -439,6 +535,13 @@ class ChairFlying:
             self.include_emergencies = True  # Implied when emergency-only is selected
         else:
             self.include_emergencies = self.prompt_include_emergencies()
+        
+        # For fixed-length sessions with emergencies, ask about emergency mode
+        if self.session_mode == 'fixed' and self.include_emergencies:
+            self.emergency_mode = self.prompt_emergency_mode()
+        else:
+            # For indefinite sessions or no emergencies, emergency_mode is not applicable
+            self.emergency_mode = None
         
         # Filter maneuvers based on user preferences
         try:
@@ -451,6 +554,8 @@ class ChairFlying:
         self.show_config_summary()
         
         print("\nStarting practice session...")
+        if self.session_mode == 'fixed':
+            print(f"You will practice {len(self.maneuvers)} maneuver(s) once each.")
         print("Press Ctrl+C to stop at any time.\n")
         
         try:
@@ -462,6 +567,12 @@ class ChairFlying:
                 
                 # Select and display maneuver
                 maneuver = self.select_maneuver()
+                
+                # Check if all maneuvers are completed in fixed-length mode
+                if maneuver is None:
+                    print("\n✓ All maneuvers completed!")
+                    break  # Exit outer loop
+                
                 current_phase = None
                 has_phases = "phases" in maneuver and maneuver["phases"]
                 
@@ -495,13 +606,28 @@ class ChairFlying:
                     elif response == 'c':
                         self.tracker.record_maneuver(maneuver, "completed", current_phase)
                         print("✓ Marked as completed")
+                        self.mark_maneuver_completed(maneuver)
+                        if self.session_mode == 'fixed':
+                            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+                            if remaining > 0:
+                                print(f"({remaining} maneuver(s) remaining)")
                         break
                     elif response == 'f':
                         self.tracker.record_maneuver(maneuver, "review", current_phase)
                         print("⚠ Marked for review")
+                        self.mark_maneuver_completed(maneuver)
+                        if self.session_mode == 'fixed':
+                            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+                            if remaining > 0:
+                                print(f"({remaining} maneuver(s) remaining)")
                         break
                     elif response == 's':
                         print("Skipped (not recorded)")
+                        self.mark_maneuver_completed(maneuver)
+                        if self.session_mode == 'fixed':
+                            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+                            if remaining > 0:
+                                print(f"({remaining} maneuver(s) remaining)")
                         break
                     elif response == 'p':
                         # Permanently skip this maneuver
