@@ -663,7 +663,23 @@ class ChairFlying:
         
         print("\nStarting practice session...")
         if self.session_mode == 'fixed':
-            print(f"You will practice {len(self.maneuvers)} maneuver(s) once each.")
+            # Count maneuvers that will definitely appear once
+            if self.emergency_mode == 'random':
+                # Only count non-emergency maneuvers for fixed-length sessions with random emergencies
+                # Partition maneuvers into emergency and non-emergency in a single pass
+                emergency_count = 0
+                non_emergency_count = 0
+                for m in self.maneuvers:
+                    if m.get("type", "").lower() == "emergency":
+                        emergency_count += 1
+                    else:
+                        non_emergency_count += 1
+                print(f"You will practice {non_emergency_count} maneuver(s) once each.")
+                if emergency_count > 0:
+                    print(f"(with the potential for any of the {emergency_count} emergency maneuver(s) to appear at random)")
+            else:
+                # All maneuvers (including emergencies) will appear once
+                print(f"You will practice {len(self.maneuvers)} maneuver(s) once each.")
         print("Press Ctrl+C to stop at any time.\n")
         
         try:
