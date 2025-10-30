@@ -82,7 +82,9 @@ Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON
 - `maneuvers_file`: Path to the maneuvers JSON file (required)
 - `interval_min`: Minimum seconds between maneuvers (optional, default: 30)
 - `interval_max`: Maximum seconds between maneuvers (optional, default: 120)
-- `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection). When set, this controls how often emergency procedures appear. For example, 25.0 means 25% chance of emergency, 75.0 means 75% chance.
+- `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
+  - When set, controls how often emergency procedures appear
+  - Example: 25.0 = 25% chance of emergency, 75.0 = 75% chance
 - `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
 - `show_maneuver_type`: Display the type of maneuver (optional, default: true)
 - `show_maneuver_description`: Display the maneuver description (optional, default: true)

@@ -242,7 +242,7 @@ class ChairFlying:
             return random.choice(self.maneuvers)
         
         # Use probability to determine whether to select an emergency
-        if random.random() * 100 < emergency_prob:
+        if random.random() < emergency_prob / 100:
             return random.choice(emergency_maneuvers)
         else:
             return random.choice(non_emergency_maneuvers)
