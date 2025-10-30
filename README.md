@@ -123,8 +123,11 @@ Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON
 #### Application Configuration (`config.json`)
 
 - `maneuvers_file`: Path to the maneuvers JSON file (required)
-- `interval_min`: Minimum seconds between maneuvers (optional, default: 30)
-- `interval_max`: Maximum seconds between maneuvers (optional, default: 120)
+- `interval_min`: Minimum seconds between maneuvers (optional)
+- `interval_max`: Maximum seconds between maneuvers (optional)
+  - **Note:** Both `interval_min` and `interval_max` must be provided together or both omitted
+  - If both are omitted, the application runs in **manual mode** where you press Enter to start each maneuver
+  - If both are provided, the application runs in **automatic mode** with timed intervals
 - `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
   - When set, controls how often emergency procedures appear
   - Example: 25.0 = 25% chance of emergency, 75.0 = 75% chance
@@ -321,16 +324,48 @@ When `emergency_probability` is **not** set (or null):
 
 **Note:** The emergency probability setting only applies when both emergency and non-emergency maneuvers are in your active rotation. If you select "Emergencies only" mode or exclude emergencies at startup, the probability setting has no effect.
 
+## Timing Modes
+
+The application supports two timing modes for presenting maneuvers:
+
+### Automatic Mode (Timer-Based)
+
+When you specify both `interval_min` and `interval_max` in your configuration, the application automatically presents maneuvers at random intervals within your specified range. This is ideal for:
+- Simulating real-world surprise scenarios
+- Maintaining a steady practice pace
+- Training quick decision-making skills
+
+### Manual Mode (User-Prompted)
+
+When you **omit both** `interval_min` and `interval_max` from your configuration, the application waits for you to press Enter before presenting each maneuver. This is ideal for:
+- Self-paced learning and reflection
+- Taking notes between maneuvers
+- Chair flying complex procedures that take varying amounts of time
+- Practicing with an instructor or study partner
+
+Simply press Enter when you're ready for the next maneuver, giving you complete control over the training pace.
+
 ## Customization Ideas
 
 - Create different configuration files for different training phases
-- Adjust intervals for longer or shorter practice sessions
+- Use automatic mode for timed drills, manual mode for in-depth study
+- Adjust intervals for longer or shorter practice sessions (automatic mode)
 - Use `emergency_probability` to match your training goals (higher for checkride prep, lower for routine practice)
 - Add custom maneuver types relevant to your aircraft or training
 - Create separate maneuvers files for different training focuses (e.g., emergency-only, private-only, commercial-only)
 - Use the interactive prompts at startup to select which maneuvers to practice each session
 
 ## Example Configurations
+
+### Manual Mode (Self-Paced)
+```json
+{
+  "maneuvers_file": "maneuvers.json",
+  "show_next_maneuver_time": true,
+  "show_maneuver_type": true,
+  "show_maneuver_description": true
+}
+```
 
 ### Quick Practice (Short Intervals)
 ```json
