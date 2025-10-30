@@ -565,7 +565,16 @@ class ChairFlying:
     def show_remaining_count(self):
         """Display remaining maneuvers count in fixed-length mode."""
         if self.session_mode == 'fixed':
-            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+            # For random emergencies mode, only count non-emergency maneuvers
+            if self.emergency_mode == 'random':
+                # Count non-emergency maneuvers that haven't been completed
+                non_emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() != "emergency"]
+                non_emergency_completed = [m for m in self.completed_maneuvers if m.get("type", "").lower() != "emergency"]
+                remaining = len(non_emergency_maneuvers) - len(non_emergency_completed)
+            else:
+                # For all emergencies mode or no emergencies, count all maneuvers
+                remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+            
             if remaining > 0:
                 print(f"({remaining} maneuver(s) remaining)")
     

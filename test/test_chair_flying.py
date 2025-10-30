@@ -356,6 +356,109 @@ class TestChairFlying(unittest.TestCase):
         finally:
             os.unlink(temp_maneuvers.name)
             os.unlink(temp_config.name)
+    
+    def test_show_remaining_count_fixed_random_emergencies(self):
+        """Test that remaining count excludes emergencies in fixed mode with random emergencies."""
+        # Create a setup with multiple commercial and emergency maneuvers
+        temp_maneuvers = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        maneuvers = [
+            {"name": "Chandelles", "type": "maneuver", "kind": "commercial"},
+            {"name": "Lazy Eights", "type": "maneuver", "kind": "commercial"},
+            {"name": "Steep Turns", "type": "maneuver", "kind": "commercial"},
+            {"name": "Engine Failure", "type": "emergency"},
+            {"name": "Electrical Fire", "type": "emergency"},
+        ]
+        json.dump(maneuvers, temp_maneuvers)
+        temp_maneuvers.close()
+        
+        temp_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        config_data = {
+            "maneuvers_file": temp_maneuvers.name,
+            "interval_min_sec": 5,
+            "interval_max_sec": 20
+        }
+        json.dump(config_data, temp_config)
+        temp_config.close()
+        
+        try:
+            app = ChairFlying(temp_config.name)
+            app.session_mode = 'fixed'
+            app.maneuver_kind = 'commercial'
+            app.include_emergencies = True
+            app.emergency_mode = 'random'
+            app.filter_maneuvers()
+            
+            # Mark one non-emergency maneuver as completed
+            app.completed_maneuvers.append(app.maneuvers[0])  # Chandelles
+            
+            # Capture the output
+            import io
+            import sys
+            captured_output = io.StringIO()
+            sys.stdout = captured_output
+            
+            app.show_remaining_count()
+            
+            sys.stdout = sys.__stdout__
+            output = captured_output.getvalue()
+            
+            # Should show 2 remaining (3 commercial - 1 completed), not 4 (5 total - 1 completed)
+            self.assertIn("2 maneuver(s) remaining", output)
+            self.assertNotIn("4 maneuver(s) remaining", output)
+        finally:
+            os.unlink(temp_maneuvers.name)
+            os.unlink(temp_config.name)
+    
+    def test_show_remaining_count_fixed_all_emergencies(self):
+        """Test that remaining count includes emergencies in fixed mode with all emergencies."""
+        # Create a setup with multiple commercial and emergency maneuvers
+        temp_maneuvers = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        maneuvers = [
+            {"name": "Chandelles", "type": "maneuver", "kind": "commercial"},
+            {"name": "Lazy Eights", "type": "maneuver", "kind": "commercial"},
+            {"name": "Steep Turns", "type": "maneuver", "kind": "commercial"},
+            {"name": "Engine Failure", "type": "emergency"},
+            {"name": "Electrical Fire", "type": "emergency"},
+        ]
+        json.dump(maneuvers, temp_maneuvers)
+        temp_maneuvers.close()
+        
+        temp_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        config_data = {
+            "maneuvers_file": temp_maneuvers.name,
+            "interval_min_sec": 5,
+            "interval_max_sec": 20
+        }
+        json.dump(config_data, temp_config)
+        temp_config.close()
+        
+        try:
+            app = ChairFlying(temp_config.name)
+            app.session_mode = 'fixed'
+            app.maneuver_kind = 'commercial'
+            app.include_emergencies = True
+            app.emergency_mode = 'all'
+            app.filter_maneuvers()
+            
+            # Mark one non-emergency maneuver as completed
+            app.completed_maneuvers.append(app.maneuvers[0])  # Chandelles
+            
+            # Capture the output
+            import io
+            import sys
+            captured_output = io.StringIO()
+            sys.stdout = captured_output
+            
+            app.show_remaining_count()
+            
+            sys.stdout = sys.__stdout__
+            output = captured_output.getvalue()
+            
+            # Should show 4 remaining (5 total - 1 completed) when all emergencies mode
+            self.assertIn("4 maneuver(s) remaining", output)
+        finally:
+            os.unlink(temp_maneuvers.name)
+            os.unlink(temp_config.name)
 
 
 if __name__ == "__main__":
