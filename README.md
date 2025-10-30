@@ -83,7 +83,7 @@ Create a `config.json` file with your application settings:
   "maneuvers_file": "maneuvers.json",
   "interval_min_sec": 30,
   "interval_max_sec": 120,
-  "emergency_probability": 25.0,
+  "emergency_probability": 0.25,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
@@ -128,9 +128,9 @@ Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON
   - **Note:** Both `interval_min_sec` and `interval_max_sec` must be provided together or both omitted. Providing only one will result in an error.
   - If both are omitted, the application runs in **manual mode** where you press Enter to start each maneuver
   - If both are provided, the application runs in **automatic mode** with timed intervals
-- `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
+- `emergency_probability`: Probability (0.0-1.0) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
   - When set, controls how often emergency procedures appear
-  - Example: 25.0 = 25% chance of emergency, 75.0 = 75% chance
+  - Example: 0.25 = 25% chance of emergency, 0.75 = 75% chance
 - `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
 - `show_maneuver_type`: Display the type of maneuver (optional, default: true)
 - `show_maneuver_description`: Display the maneuver description (optional, default: true)
@@ -304,17 +304,17 @@ This allows you to:
 
 The `emergency_probability` configuration option allows you to control how frequently emergency procedures appear during your practice session. This is useful for:
 
-- **Focused Emergency Training**: Set a high probability (e.g., 75.0) to practice emergencies more frequently while still maintaining variety
-- **Balanced Practice**: Set a moderate probability (e.g., 25.0-40.0) to ensure emergencies appear regularly but not overwhelmingly
-- **Gradual Introduction**: Set a low probability (e.g., 10.0) to occasionally practice emergencies while focusing on other maneuvers
+- **Focused Emergency Training**: Set a high probability (e.g., 0.75) to practice emergencies more frequently while still maintaining variety
+- **Balanced Practice**: Set a moderate probability (e.g., 0.25-0.4) to ensure emergencies appear regularly but not overwhelmingly
+- **Gradual Introduction**: Set a low probability (e.g., 0.1) to occasionally practice emergencies while focusing on other maneuvers
 - **Pure Random Selection**: Omit the setting entirely to let all maneuvers have equal probability based on the list size
 
 ### How It Works
 
 When `emergency_probability` is set:
-- The specified percentage (0-100) determines the probability that the next maneuver will be an emergency
+- The specified probability (0.0-1.0) determines the probability that the next maneuver will be an emergency
 - The remaining probability is distributed among non-emergency maneuvers
-- For example, with `emergency_probability: 40.0`:
+- For example, with `emergency_probability: 0.4`:
   - 40% chance: An emergency maneuver is selected
   - 60% chance: A non-emergency maneuver is selected
 
@@ -385,7 +385,7 @@ Simply press Enter when you're ready for the next maneuver, giving you complete 
   "maneuvers_file": "maneuvers.json",
   "interval_min_sec": 30,
   "interval_max_sec": 60,
-  "emergency_probability": 75.0,
+  "emergency_probability": 0.75,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
