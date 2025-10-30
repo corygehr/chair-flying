@@ -15,7 +15,41 @@ A Python application that helps pilots practice "chair flying" by presenting ran
 - **Session History**: Maintains a history of all practiced maneuvers
 - **Follow-up List**: Automatically tracks maneuvers that need more practice
 
-## Installation
+## Quick Start for Non-Developers
+
+**New to Python?** We've made it easy for you! 
+
+👉 **[Read the Quick Start Guide (QUICK_START.md)](QUICK_START.md)** for step-by-step instructions with screenshots and troubleshooting tips.
+
+### Easy Launch Options
+
+#### Windows
+Just **double-click** `run_chair_flying.bat` in the chair-flying folder!
+
+#### macOS / Linux
+**Double-click** `run_chair_flying.sh` or run it from Terminal: `./run_chair_flying.sh`
+
+These launcher scripts will:
+- Check if Python is installed
+- Verify your configuration files exist
+- Display helpful error messages if something is wrong
+- Start the application automatically
+
+### Verify Your Setup
+
+Run the setup verification script to check if everything is configured correctly:
+
+```bash
+# Windows
+python verify_setup.py
+
+# macOS/Linux
+python3 verify_setup.py
+```
+
+This checks Python version, configuration files, and maneuvers list validity.
+
+## Installation for Developers
 
 This application requires Python 3.7 or higher and uses only the standard library.
 
@@ -25,6 +59,15 @@ git clone https://github.com/corygehr/chair-flying.git
 cd chair-flying
 
 # No additional dependencies needed!
+
+# Run directly with Python
+python chair_flying.py
+# or
+python3 chair_flying.py
+
+# Or use the launcher scripts
+# Windows: run_chair_flying.bat
+# macOS/Linux: ./run_chair_flying.sh
 ```
 
 ## Configuration
