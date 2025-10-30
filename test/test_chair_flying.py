@@ -457,6 +457,91 @@ class TestChairFlying(unittest.TestCase):
         finally:
             os.unlink(temp_maneuvers.name)
             os.unlink(temp_config.name)
+    
+    def test_select_maneuver_fixed_random_emergencies_completion(self):
+        """Test that session ends when all non-emergency maneuvers are completed in random mode."""
+        # Create a setup with multiple commercial and emergency maneuvers
+        temp_maneuvers = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        maneuvers = [
+            {"name": "Chandelles", "type": "maneuver", "kind": "commercial"},
+            {"name": "Lazy Eights", "type": "maneuver", "kind": "commercial"},
+            {"name": "Steep Turns", "type": "maneuver", "kind": "commercial"},
+            {"name": "Engine Failure", "type": "emergency"},
+            {"name": "Electrical Fire", "type": "emergency"},
+        ]
+        json.dump(maneuvers, temp_maneuvers)
+        temp_maneuvers.close()
+        
+        temp_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        config_data = {
+            "maneuvers_file": temp_maneuvers.name,
+            "interval_min_sec": 5,
+            "interval_max_sec": 20
+        }
+        json.dump(config_data, temp_config)
+        temp_config.close()
+        
+        try:
+            app = ChairFlying(temp_config.name)
+            app.session_mode = 'fixed'
+            app.maneuver_kind = 'commercial'
+            app.include_emergencies = True
+            app.emergency_mode = 'random'
+            app.filter_maneuvers()
+            
+            # Mark all non-emergency maneuvers as completed
+            for m in app.maneuvers:
+                if m.get("type", "").lower() != "emergency":
+                    app.completed_maneuvers.append(m)
+            
+            # Session should be complete (return None) even though emergencies are not completed
+            result = app.select_maneuver()
+            self.assertIsNone(result, "Session should be complete when all non-emergency maneuvers are done in random mode")
+        finally:
+            os.unlink(temp_maneuvers.name)
+            os.unlink(temp_config.name)
+    
+    def test_select_maneuver_fixed_all_emergencies_completion(self):
+        """Test that session ends only when ALL maneuvers including emergencies are completed in all mode."""
+        # Create a setup with multiple commercial and emergency maneuvers
+        temp_maneuvers = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        maneuvers = [
+            {"name": "Chandelles", "type": "maneuver", "kind": "commercial"},
+            {"name": "Lazy Eights", "type": "maneuver", "kind": "commercial"},
+            {"name": "Engine Failure", "type": "emergency"},
+        ]
+        json.dump(maneuvers, temp_maneuvers)
+        temp_maneuvers.close()
+        
+        temp_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        config_data = {
+            "maneuvers_file": temp_maneuvers.name,
+            "interval_min_sec": 5,
+            "interval_max_sec": 20
+        }
+        json.dump(config_data, temp_config)
+        temp_config.close()
+        
+        try:
+            app = ChairFlying(temp_config.name)
+            app.session_mode = 'fixed'
+            app.maneuver_kind = 'commercial'
+            app.include_emergencies = True
+            app.emergency_mode = 'all'
+            app.filter_maneuvers()
+            
+            # Mark all non-emergency maneuvers as completed
+            for m in app.maneuvers:
+                if m.get("type", "").lower() != "emergency":
+                    app.completed_maneuvers.append(m)
+            
+            # Session should NOT be complete - should return an emergency maneuver
+            result = app.select_maneuver()
+            self.assertIsNotNone(result, "Session should NOT be complete when emergencies remain in all mode")
+            self.assertEqual(result.get("type", "").lower(), "emergency")
+        finally:
+            os.unlink(temp_maneuvers.name)
+            os.unlink(temp_config.name)
 
 
 if __name__ == "__main__":
