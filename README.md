@@ -51,7 +51,7 @@ This checks Python version, configuration files, and maneuvers list validity.
 
 ## Installation for Developers
 
-This application requires Python 3.7 or higher and uses only the standard library.
+This application requires Python 3.8 or higher and uses only the standard library.
 
 ```bash
 # Clone the repository
@@ -438,6 +438,26 @@ Alternatively, you can use the main maneuvers.json file and select to exclude em
   "show_maneuver_description": true
 }
 ```
+
+## Development
+
+### Running Tests
+
+The project includes comprehensive unit tests located in the `test` directory. Tests use Python's built-in `unittest` framework and require no additional dependencies.
+
+Run all tests:
+```bash
+python -m unittest discover -s test -p "test_*.py"
+```
+
+Run tests with verbose output:
+```bash
+python -m unittest discover -s test -p "test_*.py" -v
+```
+
+Tests are automatically run on every pull request via GitHub Actions, ensuring code quality and compatibility across Python versions 3.8-3.12.
+
+For more information about testing, see [test/README.md](test/README.md).
 
 ## License
 
