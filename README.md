@@ -125,7 +125,7 @@ Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON
 - `maneuvers_file`: Path to the maneuvers JSON file (required)
 - `interval_min`: Minimum seconds between maneuvers (optional)
 - `interval_max`: Maximum seconds between maneuvers (optional)
-  - **Note:** Both `interval_min` and `interval_max` must be provided together or both omitted
+  - **Note:** Both `interval_min` and `interval_max` must be provided together or both omitted. Providing only one will result in an error.
   - If both are omitted, the application runs in **manual mode** where you press Enter to start each maneuver
   - If both are provided, the application runs in **automatic mode** with timed intervals
 - `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
