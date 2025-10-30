@@ -20,7 +20,7 @@ class TestConfiguration(unittest.TestCase):
             "show_next_maneuver_time": True,
             "show_maneuver_type": True,
             "show_maneuver_description": True,
-            "emergency_probability": 25.0
+            "emergency_probability": 0.25
         }
         
         config = Configuration(config_dict)
@@ -31,7 +31,7 @@ class TestConfiguration(unittest.TestCase):
         self.assertTrue(config.show_next_maneuver_time)
         self.assertTrue(config.show_maneuver_type)
         self.assertTrue(config.show_maneuver_description)
-        self.assertEqual(config.emergency_probability, 25.0)
+        self.assertEqual(config.emergency_probability, 0.25)
         self.assertFalse(config.is_manual_mode())
     
     def test_manual_mode_configuration(self):
@@ -122,20 +122,20 @@ class TestConfiguration(unittest.TestCase):
         """Test that out-of-range emergency_probability raises ValueError."""
         config_dict = {
             "maneuvers_file": "maneuvers.json",
-            "emergency_probability": 150.0
+            "emergency_probability": 1.5
         }
         
         with self.assertRaises(ValueError) as context:
             Configuration(config_dict)
         
-        self.assertIn("between 0 and 100", str(context.exception))
+        self.assertIn("between 0 and 1", str(context.exception))
         
-        config_dict["emergency_probability"] = -10.0
+        config_dict["emergency_probability"] = -0.1
         
         with self.assertRaises(ValueError) as context:
             Configuration(config_dict)
         
-        self.assertIn("between 0 and 100", str(context.exception))
+        self.assertIn("between 0 and 1", str(context.exception))
 
 
 if __name__ == "__main__":

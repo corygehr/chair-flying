@@ -229,7 +229,7 @@ class TestChairFlying(unittest.TestCase):
             "maneuvers_file": self.temp_maneuvers.name,
             "interval_min_sec": 30,
             "interval_max_sec": 120,
-            "emergency_probability": 50.0
+            "emergency_probability": 0.5
         }
         json.dump(config_data, temp_config)
         temp_config.close()

@@ -76,8 +76,8 @@ class Configuration:
             prob = config["emergency_probability"]
             if not isinstance(prob, (int, float)):
                 raise ValueError("emergency_probability must be a number")
-            if prob < 0 or prob > 100:
-                raise ValueError("emergency_probability must be between 0 and 100")
+            if prob < 0 or prob > 1:
+                raise ValueError("emergency_probability must be between 0 and 1")
             self._emergency_probability = prob
     
     @property
@@ -403,7 +403,7 @@ class ChairFlying:
         
         Args:
             maneuvers: List of maneuvers to select from
-            emergency_prob: Probability (0-100) of selecting an emergency
+            emergency_prob: Probability (0-1) of selecting an emergency
             
         Returns:
             Selected maneuver
@@ -416,7 +416,7 @@ class ChairFlying:
             return random.choice(maneuvers)
         
         # Use probability to determine maneuver type
-        if random.random() < emergency_prob / 100:
+        if random.random() < emergency_prob:
             return random.choice(emergencies)
         else:
             return random.choice(non_emergencies)
@@ -616,7 +616,7 @@ class ChairFlying:
         
         # Emergency probability setting
         if self.config.emergency_probability is not None:
-            print(f"Emergency probability: {self.config.emergency_probability}%")
+            print(f"Emergency probability: {self.config.emergency_probability * 100}%")
         
         # Display options
         print(f"Display options:")
