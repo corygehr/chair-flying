@@ -83,11 +83,14 @@ Create a `config.json` file with your application settings:
   "maneuvers_file": "maneuvers.json",
   "interval_min": 30,
   "interval_max": 120,
+  "emergency_probability": 25.0,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
 }
 ```
+
+**Note:** The `emergency_probability` setting is optional. If not specified, maneuvers will be selected using pure random selection.
 
 ### 2. Maneuvers List (`maneuvers.json`)
 
@@ -122,6 +125,9 @@ Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON
 - `maneuvers_file`: Path to the maneuvers JSON file (required)
 - `interval_min`: Minimum seconds between maneuvers (optional, default: 30)
 - `interval_max`: Maximum seconds between maneuvers (optional, default: 120)
+- `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
+  - When set, controls how often emergency procedures appear
+  - Example: 25.0 = 25% chance of emergency, 75.0 = 75% chance
 - `show_next_maneuver_time`: Display "Next maneuver in X seconds" message (optional, default: true)
 - `show_maneuver_type`: Display the type of maneuver (optional, default: true)
 - `show_maneuver_description`: Display the maneuver description (optional, default: true)
@@ -291,10 +297,35 @@ This allows you to:
 - Identify maneuvers that need more work
 - Track your progress over time
 
+## Emergency Probability Control
+
+The `emergency_probability` configuration option allows you to control how frequently emergency procedures appear during your practice session. This is useful for:
+
+- **Focused Emergency Training**: Set a high probability (e.g., 75.0) to practice emergencies more frequently while still maintaining variety
+- **Balanced Practice**: Set a moderate probability (e.g., 25.0-40.0) to ensure emergencies appear regularly but not overwhelmingly
+- **Gradual Introduction**: Set a low probability (e.g., 10.0) to occasionally practice emergencies while focusing on other maneuvers
+- **Pure Random Selection**: Omit the setting entirely to let all maneuvers have equal probability based on the list size
+
+### How It Works
+
+When `emergency_probability` is set:
+- The specified percentage (0-100) determines the probability that the next maneuver will be an emergency
+- The remaining probability is distributed among non-emergency maneuvers
+- For example, with `emergency_probability: 40.0`:
+  - 40% chance: An emergency maneuver is selected
+  - 60% chance: A non-emergency maneuver is selected
+
+When `emergency_probability` is **not** set (or null):
+- All maneuvers in your filtered list have equal probability of being selected
+- This is the default behavior for backward compatibility
+
+**Note:** The emergency probability setting only applies when both emergency and non-emergency maneuvers are in your active rotation. If you select "Emergencies only" mode or exclude emergencies at startup, the probability setting has no effect.
+
 ## Customization Ideas
 
 - Create different configuration files for different training phases
 - Adjust intervals for longer or shorter practice sessions
+- Use `emergency_probability` to match your training goals (higher for checkride prep, lower for routine practice)
 - Add custom maneuver types relevant to your aircraft or training
 - Create separate maneuvers files for different training focuses (e.g., emergency-only, private-only, commercial-only)
 - Use the interactive prompts at startup to select which maneuvers to practice each session
@@ -307,6 +338,19 @@ This allows you to:
   "maneuvers_file": "maneuvers.json",
   "interval_min": 15,
   "interval_max": 30,
+  "show_next_maneuver_time": true,
+  "show_maneuver_type": true,
+  "show_maneuver_description": true
+}
+```
+
+### Emergency-Focused Training (High Emergency Probability)
+```json
+{
+  "maneuvers_file": "maneuvers.json",
+  "interval_min": 30,
+  "interval_max": 60,
+  "emergency_probability": 75.0,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
