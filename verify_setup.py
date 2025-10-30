@@ -67,8 +67,8 @@ def check_config_file():
         print("""
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 30,
-  "interval_max": 120,
+  "interval_min_sec": 30,
+  "interval_max_sec": 120,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
@@ -89,21 +89,21 @@ def check_config_file():
         print_success(f"Maneuvers file setting: {config['maneuvers_file']}")
         
         # Check interval settings
-        if "interval_min" in config or "interval_max" in config:
-            if "interval_min" not in config or "interval_max" not in config:
-                print_error("Both interval_min and interval_max must be provided together")
+        if "interval_min_sec" in config or "interval_max_sec" in config:
+            if "interval_min_sec" not in config or "interval_max_sec" not in config:
+                print_error("Both interval_min_sec and interval_max_sec must be provided together")
                 return False
             
-            min_val = config["interval_min"]
-            max_val = config["interval_max"]
+            min_val = config["interval_min_sec"]
+            max_val = config["interval_max_sec"]
             
             if min_val > max_val:
-                print_error(f"interval_min ({min_val}) must be <= interval_max ({max_val})")
+                print_error(f"interval_min_sec ({min_val}) must be <= interval_max_sec ({max_val})")
                 return False
             
             print_success(f"Interval range: {min_val}-{max_val} seconds")
         else:
-            print_warning("Using default intervals: 30-120 seconds")
+            print_warning("Manual mode: No automatic intervals configured")
         
         return True
         

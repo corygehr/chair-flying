@@ -104,18 +104,18 @@ class ChairFlying:
             raise ValueError("Configuration missing required key: maneuvers_file")
         
         # Validate interval configuration - both or neither should be provided
-        has_min = "interval_min" in config
-        has_max = "interval_max" in config
+        has_min = "interval_min_sec" in config
+        has_max = "interval_max_sec" in config
         
         if has_min != has_max:
             raise ValueError(
-                "Both interval_min and interval_max must be provided together, "
+                "Both interval_min_sec and interval_max_sec must be provided together, "
                 "or neither (for manual mode)"
             )
         
         if has_min and has_max:
-            if config["interval_min"] > config["interval_max"]:
-                raise ValueError("interval_min must be less than or equal to interval_max")
+            if config["interval_min_sec"] > config["interval_max_sec"]:
+                raise ValueError("interval_min_sec must be less than or equal to interval_max_sec")
         
         # Set default values for display options
         config.setdefault("show_next_maneuver_time", True)
@@ -170,12 +170,12 @@ class ChairFlying:
     
     def is_manual_mode(self) -> bool:
         """Check if manual mode is enabled (no interval configuration)."""
-        return "interval_min" not in self.config and "interval_max" not in self.config
+        return "interval_min_sec" not in self.config and "interval_max_sec" not in self.config
     
     def get_random_interval(self) -> int:
         """Get random interval between min and max from config."""
-        min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
-        max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
+        min_interval = self.config.get("interval_min_sec", self.DEFAULT_INTERVAL_MIN)
+        max_interval = self.config.get("interval_max_sec", self.DEFAULT_INTERVAL_MAX)
         return random.randint(min_interval, max_interval)
     
     def prompt_maneuver_kind(self) -> str:
@@ -533,8 +533,8 @@ class ChairFlying:
         if self.is_manual_mode():
             print(f"Timing mode: Manual (user-prompted)")
         else:
-            min_interval = self.config.get("interval_min", self.DEFAULT_INTERVAL_MIN)
-            max_interval = self.config.get("interval_max", self.DEFAULT_INTERVAL_MAX)
+            min_interval = self.config.get("interval_min_sec", self.DEFAULT_INTERVAL_MIN)
+            max_interval = self.config.get("interval_max_sec", self.DEFAULT_INTERVAL_MAX)
             print(f"Timing mode: Automatic")
             print(f"Interval range: {min_interval}-{max_interval} seconds")
         

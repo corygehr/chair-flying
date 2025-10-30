@@ -81,8 +81,8 @@ Create a `config.json` file with your application settings:
 ```json
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 30,
-  "interval_max": 120,
+  "interval_min_sec": 30,
+  "interval_max_sec": 120,
   "emergency_probability": 25.0,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
@@ -123,9 +123,9 @@ Create a `maneuvers.json` file with your maneuvers. The maneuvers file is a JSON
 #### Application Configuration (`config.json`)
 
 - `maneuvers_file`: Path to the maneuvers JSON file (required)
-- `interval_min`: Minimum seconds between maneuvers (optional)
-- `interval_max`: Maximum seconds between maneuvers (optional)
-  - **Note:** Both `interval_min` and `interval_max` must be provided together or both omitted. Providing only one will result in an error.
+- `interval_min_sec`: Minimum seconds to wait between maneuvers (optional)
+- `interval_max_sec`: Maximum seconds to wait between maneuvers (optional)
+  - **Note:** Both `interval_min_sec` and `interval_max_sec` must be provided together or both omitted. Providing only one will result in an error.
   - If both are omitted, the application runs in **manual mode** where you press Enter to start each maneuver
   - If both are provided, the application runs in **automatic mode** with timed intervals
 - `emergency_probability`: Percentage probability (0-100) that the next maneuver will be an emergency (optional, default: none - uses pure random selection)
@@ -330,14 +330,14 @@ The application supports two timing modes for presenting maneuvers:
 
 ### Automatic Mode (Timer-Based)
 
-When you specify both `interval_min` and `interval_max` in your configuration, the application automatically presents maneuvers at random intervals within your specified range. This is ideal for:
+When you specify both `interval_min_sec` and `interval_max_sec` in your configuration, the application automatically presents maneuvers at random intervals within your specified range. This is ideal for:
 - Simulating real-world surprise scenarios
 - Maintaining a steady practice pace
 - Training quick decision-making skills
 
 ### Manual Mode (User-Prompted)
 
-When you **omit both** `interval_min` and `interval_max` from your configuration, the application waits for you to press Enter before presenting each maneuver. This is ideal for:
+When you **omit both** `interval_min_sec` and `interval_max_sec` from your configuration, the application waits for you to press Enter before presenting each maneuver. This is ideal for:
 - Self-paced learning and reflection
 - Taking notes between maneuvers
 - Chair flying complex procedures that take varying amounts of time
@@ -371,8 +371,8 @@ Simply press Enter when you're ready for the next maneuver, giving you complete 
 ```json
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 15,
-  "interval_max": 30,
+  "interval_min_sec": 15,
+  "interval_max_sec": 30,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
@@ -383,8 +383,8 @@ Simply press Enter when you're ready for the next maneuver, giving you complete 
 ```json
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 30,
-  "interval_max": 60,
+  "interval_min_sec": 30,
+  "interval_max_sec": 60,
   "emergency_probability": 75.0,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
@@ -396,8 +396,8 @@ Simply press Enter when you're ready for the next maneuver, giving you complete 
 ```json
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 30,
-  "interval_max": 120,
+  "interval_min_sec": 30,
+  "interval_max_sec": 120,
   "show_next_maneuver_time": false,
   "show_maneuver_type": false,
   "show_maneuver_description": false
@@ -420,8 +420,8 @@ Then reference it in your config:
 ```json
 {
   "maneuvers_file": "emergency_maneuvers.json",
-  "interval_min": 30,
-  "interval_max": 120
+  "interval_min_sec": 30,
+  "interval_max_sec": 120
 }
 ```
 
@@ -431,8 +431,8 @@ Alternatively, you can use the main maneuvers.json file and select to exclude em
 ```json
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 60,
-  "interval_max": 180,
+  "interval_min_sec": 60,
+  "interval_max_sec": 180,
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true

@@ -163,8 +163,8 @@ Edit `config.json` in any text editor (Notepad, TextEdit, etc.):
 ```json
 {
   "maneuvers_file": "maneuvers.json",
-  "interval_min": 30,    ← Minimum wait time in seconds before next maneuver
-  "interval_max": 120,   ← Maximum wait time in seconds before next maneuver
+  "interval_min_sec": 30,    ← Minimum time to wait between maneuvers (in seconds)
+  "interval_max_sec": 120,   ← Maximum time to wait between maneuvers (in seconds)
   "emergency_probability": 25.0,  ← Optional: % chance of emergencies (0-100)
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
@@ -173,7 +173,7 @@ Edit `config.json` in any text editor (Notepad, TextEdit, etc.):
 ```
 
 **Configuration Options:**
-- `interval_min` and `interval_max`: Wait time range in seconds before presenting the next maneuver
+- `interval_min_sec` and `interval_max_sec`: Wait time range in seconds before presenting the next maneuver
   - Omit both for manual mode (press Enter to continue)
   - Must provide both together for automatic timing
 - `emergency_probability`: Optional - Controls how often emergencies appear (0-100%)
