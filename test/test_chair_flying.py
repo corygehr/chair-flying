@@ -307,6 +307,51 @@ class TestChairFlying(unittest.TestCase):
         
         self.assertFalse(has_maneuvers)
         self.assertEqual(len(app.maneuvers), 0)
+    
+    def test_fixed_length_session_maneuver_count(self):
+        """Test that fixed-length session with random emergencies counts correctly."""
+        # Create a setup with multiple commercial and emergency maneuvers
+        temp_maneuvers = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        maneuvers = [
+            {"name": "Chandelles", "type": "maneuver", "kind": "commercial"},
+            {"name": "Lazy Eights", "type": "maneuver", "kind": "commercial"},
+            {"name": "Steep Turns", "type": "maneuver", "kind": "commercial"},
+            {"name": "Engine Failure", "type": "emergency"},
+            {"name": "Electrical Fire", "type": "emergency"},
+        ]
+        json.dump(maneuvers, temp_maneuvers)
+        temp_maneuvers.close()
+        
+        temp_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        config_data = {
+            "maneuvers_file": temp_maneuvers.name,
+            "interval_min_sec": 5,
+            "interval_max_sec": 20
+        }
+        json.dump(config_data, temp_config)
+        temp_config.close()
+        
+        try:
+            app = ChairFlying(temp_config.name)
+            app.session_mode = 'fixed'
+            app.maneuver_kind = 'commercial'
+            app.include_emergencies = True
+            app.emergency_mode = 'random'
+            app.filter_maneuvers()
+            
+            # Should have 3 commercial + 2 emergency = 5 total
+            self.assertEqual(len(app.maneuvers), 5)
+            
+            # Count non-emergency maneuvers
+            non_emergency = [m for m in app.maneuvers if m.get("type", "").lower() != "emergency"]
+            self.assertEqual(len(non_emergency), 3)
+            
+            # Count emergency maneuvers
+            emergency = [m for m in app.maneuvers if m.get("type", "").lower() == "emergency"]
+            self.assertEqual(len(emergency), 2)
+        finally:
+            os.unlink(temp_maneuvers.name)
+            os.unlink(temp_config.name)
 
 
 if __name__ == "__main__":
