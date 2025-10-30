@@ -666,8 +666,14 @@ class ChairFlying:
             # Count maneuvers that will definitely appear once
             if self.emergency_mode == 'random':
                 # Only count non-emergency maneuvers for fixed-length sessions with random emergencies
-                non_emergency_count = sum(1 for m in self.maneuvers if m.get("type", "").lower() != "emergency")
-                emergency_count = sum(1 for m in self.maneuvers if m.get("type", "").lower() == "emergency")
+                # Partition maneuvers into emergency and non-emergency in a single pass
+                emergency_count = 0
+                non_emergency_count = 0
+                for m in self.maneuvers:
+                    if m.get("type", "").lower() == "emergency":
+                        emergency_count += 1
+                    else:
+                        non_emergency_count += 1
                 print(f"You will practice {non_emergency_count} maneuver(s) once each.")
                 if emergency_count > 0:
                     print(f"(with the potential for any of the {emergency_count} emergency maneuver(s) to appear at random)")

@@ -342,13 +342,17 @@ class TestChairFlying(unittest.TestCase):
             # Should have 3 commercial + 2 emergency = 5 total
             self.assertEqual(len(app.maneuvers), 5)
             
-            # Count non-emergency maneuvers
-            non_emergency = [m for m in app.maneuvers if m.get("type", "").lower() != "emergency"]
-            self.assertEqual(len(non_emergency), 3)
+            # Count non-emergency and emergency maneuvers in a single pass
+            emergency_count = 0
+            non_emergency_count = 0
+            for m in app.maneuvers:
+                if m.get("type", "").lower() == "emergency":
+                    emergency_count += 1
+                else:
+                    non_emergency_count += 1
             
-            # Count emergency maneuvers
-            emergency = [m for m in app.maneuvers if m.get("type", "").lower() == "emergency"]
-            self.assertEqual(len(emergency), 2)
+            self.assertEqual(non_emergency_count, 3)
+            self.assertEqual(emergency_count, 2)
         finally:
             os.unlink(temp_maneuvers.name)
             os.unlink(temp_config.name)
