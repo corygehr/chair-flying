@@ -51,7 +51,7 @@ This checks Python version, configuration files, and maneuvers list validity.
 
 ## Installation for Developers
 
-This application requires Python 3.7 or higher and uses only the standard library.
+This application requires Python 3.8 or higher and uses only the standard library.
 
 ```bash
 # Clone the repository
@@ -455,7 +455,7 @@ Run tests with verbose output:
 python -m unittest discover -s test -p "test_*.py" -v
 ```
 
-Tests are automatically run on every pull request via GitHub Actions, ensuring code quality and compatibility across Python versions 3.7-3.12.
+Tests are automatically run on every pull request via GitHub Actions, ensuring code quality and compatibility across Python versions 3.8-3.12.
 
 For more information about testing, see [test/README.md](test/README.md).
 

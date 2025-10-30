@@ -5,7 +5,7 @@ This guide will help you get started with Chair Flying even if you've never used
 ## What You'll Need
 
 1. **A Computer** - Windows, macOS, or Linux
-2. **Python 3.7 or higher** - Free programming language (we'll show you how to install it)
+2. **Python 3.8 or higher** - Free programming language (we'll show you how to install it)
 3. **5-10 minutes** - For setup
 
 ## Step-by-Step Installation
@@ -228,7 +228,7 @@ Open Terminal and run:
 chmod +x run_chair_flying.sh
 ```
 
-### "Python 3.7 or higher is required"
+### "Python 3.8 or higher is required"
 
 **Problem:** Your Python version is too old.
 

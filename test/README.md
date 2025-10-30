@@ -38,12 +38,12 @@ python -m unittest test.test_configuration.TestConfiguration.test_basic_configur
 
 ## Requirements
 
-- Python 3.7 or higher
+- Python 3.8 or higher
 - No external dependencies required (uses Python's built-in `unittest` module)
 
 ## Continuous Integration
 
-Tests are automatically run on every pull request via GitHub Actions. The workflow tests against multiple Python versions (3.7-3.12) to ensure compatibility.
+Tests are automatically run on every pull request via GitHub Actions. The workflow tests against multiple Python versions (3.8-3.12) to ensure compatibility.
 
 ## Adding New Tests
 

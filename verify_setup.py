@@ -39,11 +39,11 @@ def check_python_version():
     version_str = f"{version.major}.{version.minor}.{version.micro}"
     print(f"Python version: {version_str}")
     
-    if version >= (3, 7):
-        print_success(f"Python {version_str} is compatible (requires 3.7+)")
+    if version >= (3, 8):
+        print_success(f"Python {version_str} is compatible (requires 3.8+)")
         return True
     else:
-        print_error(f"Python {version_str} is too old. Please upgrade to 3.7 or higher.")
+        print_error(f"Python {version_str} is too old. Please upgrade to 3.8 or higher.")
         return False
 
 
