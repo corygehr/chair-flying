@@ -138,10 +138,12 @@ If all checks pass, you're ready to go! If any checks fail, the script will tell
 
 When you run the program, you'll see:
 
-1. **Maneuver Selection** - Choose which types of maneuvers to practice
-2. **Emergency Scenarios** - Choose whether to include emergencies
-3. **Configuration Summary** - Review your settings
-4. **Practice Session** - Maneuvers will be displayed at random intervals
+1. **Session Mode Selection** - Choose indefinite (random) or fixed-length (each once) practice
+2. **Maneuver Selection** - Choose which types of maneuvers to practice
+3. **Emergency Scenarios** - Choose whether to include emergencies
+4. **Emergency Mode** (fixed-length only) - Choose if all emergencies appear or random
+5. **Configuration Summary** - Review your settings
+6. **Practice Session** - Maneuvers will be displayed at random intervals (or when you press Enter)
 
 ### During Practice
 
@@ -163,11 +165,21 @@ Edit `config.json` in any text editor (Notepad, TextEdit, etc.):
   "maneuvers_file": "maneuvers.json",
   "interval_min": 30,    ← Change this to your minimum seconds
   "interval_max": 120,   ← Change this to your maximum seconds
+  "emergency_probability": 25.0,  ← Optional: % chance of emergencies (0-100)
   "show_next_maneuver_time": true,
   "show_maneuver_type": true,
   "show_maneuver_description": true
 }
 ```
+
+**Configuration Options:**
+- `interval_min` and `interval_max`: Time range between maneuvers (in seconds)
+  - Omit both for manual mode (press Enter to continue)
+  - Must provide both together for automatic timing
+- `emergency_probability`: Optional - Controls how often emergencies appear (0-100%)
+  - Example: 25.0 = 25% chance of emergency, 75% chance of regular maneuver
+  - Leave out for equal probability based on your maneuver list
+- Display toggles: Control what information is shown during practice
 
 ### Adding Your Own Maneuvers
 

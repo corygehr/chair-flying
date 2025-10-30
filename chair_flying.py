@@ -28,13 +28,18 @@ class ManeuverTracker:
             try:
                 with open(self.history_file, 'r') as f:
                     self.history = json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (json.JSONDecodeError, IOError) as e:
+                # Log warning but don't fail - start with empty history
+                print(f"Warning: Could not load history file: {e}")
                 self.history = []
     
     def save_history(self):
         """Save history to file."""
-        with open(self.history_file, 'w') as f:
-            json.dump(self.history, f, indent=2)
+        try:
+            with open(self.history_file, 'w') as f:
+                json.dump(self.history, f, indent=2)
+        except IOError as e:
+            print(f"Warning: Could not save history file: {e}")
     
     def record_maneuver(self, maneuver: Dict, status: str, phase: Optional[Dict] = None):
         """Record a maneuver attempt with timestamp and status."""
@@ -82,8 +87,17 @@ class ChairFlying:
                 "Please create it with your settings."
             )
         
-        with open(self.config_file, 'r') as f:
-            config = json.load(f)
+        try:
+            with open(self.config_file, 'r') as f:
+                config = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"Configuration file '{self.config_file}' contains invalid JSON: {e}"
+            )
+        except IOError as e:
+            raise IOError(
+                f"Error reading configuration file '{self.config_file}': {e}"
+            )
         
         # Validate configuration
         if "maneuvers_file" not in config:
@@ -128,8 +142,23 @@ class ChairFlying:
                 "Please create it with your maneuvers."
             )
         
-        with open(maneuvers_file, 'r') as f:
-            maneuvers = json.load(f)
+        if not maneuvers_file.is_file():
+            raise ValueError(
+                f"Maneuvers file path '{maneuvers_file}' is not a file. "
+                "Please provide a valid file path."
+            )
+        
+        try:
+            with open(maneuvers_file, 'r') as f:
+                maneuvers = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"Maneuvers file '{maneuvers_file}' contains invalid JSON: {e}"
+            )
+        except IOError as e:
+            raise IOError(
+                f"Error reading maneuvers file '{maneuvers_file}': {e}"
+            )
         
         if not isinstance(maneuvers, list):
             raise ValueError("Maneuvers file must contain a JSON array of maneuvers")
@@ -277,56 +306,44 @@ class ChairFlying:
         if not self.maneuvers:
             raise ValueError("No maneuvers configured!")
         
-        # For fixed-length sessions, select from uncompleted maneuvers
+        # Determine available maneuvers based on session mode
         if self.session_mode == 'fixed':
-            available_maneuvers = [m for m in self.maneuvers if m not in self.completed_maneuvers]
-            if not available_maneuvers:
+            available = [m for m in self.maneuvers if m not in self.completed_maneuvers]
+            if not available:
                 return None  # All maneuvers completed
-            
-            # For fixed sessions with all emergencies mode, just pick randomly from available
-            if self.emergency_mode == 'all':
-                return random.choice(available_maneuvers)
-            
-            # For random emergency mode in fixed sessions, use probability if configured
-            emergency_prob = self.config.get("emergency_probability")
-            if emergency_prob is None:
-                return random.choice(available_maneuvers)
-            
-            # Separate available emergency and non-emergency maneuvers
-            available_emergency = [m for m in available_maneuvers if m.get("type", "").lower() == "emergency"]
-            available_non_emergency = [m for m in available_maneuvers if m.get("type", "").lower() != "emergency"]
-            
-            # If no emergencies or no non-emergencies, fall back to random selection
-            if not available_emergency or not available_non_emergency:
-                return random.choice(available_maneuvers)
-            
-            # Use probability to determine whether to select an emergency
-            if random.random() < emergency_prob / 100:
-                return random.choice(available_emergency)
-            else:
-                return random.choice(available_non_emergency)
-        
-        # For indefinite sessions, use the original logic
-        # Check if emergency_probability is configured
-        emergency_prob = self.config.get("emergency_probability")
-        
-        # If no probability configured, use standard random selection
-        if emergency_prob is None:
-            return random.choice(self.maneuvers)
-        
-        # Separate emergency and non-emergency maneuvers
-        emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() == "emergency"]
-        non_emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() != "emergency"]
-        
-        # If no emergencies or no non-emergencies, fall back to random selection
-        if not emergency_maneuvers or not non_emergency_maneuvers:
-            return random.choice(self.maneuvers)
-        
-        # Use probability to determine whether to select an emergency
-        if random.random() < emergency_prob / 100:
-            return random.choice(emergency_maneuvers)
         else:
-            return random.choice(non_emergency_maneuvers)
+            available = self.maneuvers
+        
+        # For fixed sessions with all emergencies mode, or no probability configured
+        if (self.session_mode == 'fixed' and self.emergency_mode == 'all') or \
+           self.config.get("emergency_probability") is None:
+            return random.choice(available)
+        
+        # Use weighted selection based on emergency_probability
+        return self._select_with_probability(available, self.config["emergency_probability"])
+    
+    def _select_with_probability(self, maneuvers: List[Dict], emergency_prob: float) -> Dict:
+        """Select a maneuver using weighted probability for emergencies.
+        
+        Args:
+            maneuvers: List of maneuvers to select from
+            emergency_prob: Probability (0-100) of selecting an emergency
+            
+        Returns:
+            Selected maneuver
+        """
+        emergencies = [m for m in maneuvers if m.get("type", "").lower() == "emergency"]
+        non_emergencies = [m for m in maneuvers if m.get("type", "").lower() != "emergency"]
+        
+        # If only one type available, select from that type
+        if not emergencies or not non_emergencies:
+            return random.choice(maneuvers)
+        
+        # Use probability to determine maneuver type
+        if random.random() < emergency_prob / 100:
+            return random.choice(emergencies)
+        else:
+            return random.choice(non_emergencies)
     
     def select_phase(self, maneuver: Dict) -> Optional[Dict]:
         """Select a random phase from the maneuver's phases."""
@@ -468,6 +485,13 @@ class ChairFlying:
         """
         if self.session_mode == 'fixed' and maneuver not in self.completed_maneuvers:
             self.completed_maneuvers.append(maneuver)
+    
+    def show_remaining_count(self):
+        """Display remaining maneuvers count in fixed-length mode."""
+        if self.session_mode == 'fixed':
+            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+            if remaining > 0:
+                print(f"({remaining} maneuver(s) remaining)")
     
     def show_config_summary(self):
         """Display a summary of all configuration options."""
@@ -623,27 +647,18 @@ class ChairFlying:
                         self.tracker.record_maneuver(maneuver, "completed", current_phase)
                         print("✓ Marked as completed")
                         self.mark_maneuver_completed(maneuver)
-                        if self.session_mode == 'fixed':
-                            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
-                            if remaining > 0:
-                                print(f"({remaining} maneuver(s) remaining)")
+                        self.show_remaining_count()
                         break
                     elif response == 'f':
                         self.tracker.record_maneuver(maneuver, "review", current_phase)
                         print("⚠ Marked for review")
                         self.mark_maneuver_completed(maneuver)
-                        if self.session_mode == 'fixed':
-                            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
-                            if remaining > 0:
-                                print(f"({remaining} maneuver(s) remaining)")
+                        self.show_remaining_count()
                         break
                     elif response == 's':
                         print("Skipped (not recorded)")
                         self.mark_maneuver_completed(maneuver)
-                        if self.session_mode == 'fixed':
-                            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
-                            if remaining > 0:
-                                print(f"({remaining} maneuver(s) remaining)")
+                        self.show_remaining_count()
                         break
                     elif response == 'p':
                         # Permanently skip this maneuver
