@@ -7,6 +7,8 @@ import unittest
 import json
 import tempfile
 import os
+import io
+import sys
 from pathlib import Path
 from chair_flying import ChairFlying, Configuration
 
@@ -392,8 +394,6 @@ class TestChairFlying(unittest.TestCase):
             app.completed_maneuvers.append(app.maneuvers[0])  # Chandelles
             
             # Capture the output
-            import io
-            import sys
             captured_output = io.StringIO()
             sys.stdout = captured_output
             
@@ -444,8 +444,6 @@ class TestChairFlying(unittest.TestCase):
             app.completed_maneuvers.append(app.maneuvers[0])  # Chandelles
             
             # Capture the output
-            import io
-            import sys
             captured_output = io.StringIO()
             sys.stdout = captured_output
             
