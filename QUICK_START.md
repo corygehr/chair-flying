@@ -76,7 +76,30 @@ Make sure your folder contains these files:
 - `config.json` - Configuration file
 - `maneuvers.json` - List of maneuvers
 - `run_chair_flying.bat` (Windows) or `run_chair_flying.sh` (macOS/Linux) - Launcher script
+- `verify_setup.py` - Setup verification tool
 - `README.md` - Full documentation
+
+### Step 4: Verify Your Setup (Optional but Recommended)
+
+Before running Chair Flying for the first time, you can verify everything is set up correctly:
+
+**Windows:**
+```
+python verify_setup.py
+```
+
+**macOS/Linux:**
+```
+python3 verify_setup.py
+```
+
+This will check:
+- ✓ Python version is compatible
+- ✓ All required files exist
+- ✓ Configuration files are valid
+- ✓ Maneuvers are loaded correctly
+
+If all checks pass, you're ready to go! If any checks fail, the script will tell you what needs to be fixed.
 
 ## Running Chair Flying
 

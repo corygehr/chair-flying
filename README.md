@@ -35,6 +35,20 @@ These launcher scripts will:
 - Display helpful error messages if something is wrong
 - Start the application automatically
 
+### Verify Your Setup
+
+Run the setup verification script to check if everything is configured correctly:
+
+```bash
+# Windows
+python verify_setup.py
+
+# macOS/Linux
+python3 verify_setup.py
+```
+
+This checks Python version, configuration files, and maneuvers list validity.
+
 ## Installation for Developers
 
 This application requires Python 3.7 or higher and uses only the standard library.
