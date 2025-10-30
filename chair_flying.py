@@ -384,9 +384,20 @@ class ChairFlying:
         
         # Determine available maneuvers based on session mode
         if self.session_mode == 'fixed':
-            available = [m for m in self.maneuvers if m not in self.completed_maneuvers]
-            if not available:
-                return None  # All maneuvers completed
+            # For random emergencies mode, check if non-emergency maneuvers are completed
+            if self.emergency_mode == 'random':
+                # Check if all non-emergency maneuvers are completed
+                non_emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() != "emergency"]
+                non_emergency_completed = [m for m in self.completed_maneuvers if m.get("type", "").lower() != "emergency"]
+                if len(non_emergency_completed) >= len(non_emergency_maneuvers):
+                    return None  # All required maneuvers completed
+                # Available pool includes all maneuvers for selection
+                available = self.maneuvers
+            else:
+                # For all emergencies mode, check if all maneuvers are completed
+                available = [m for m in self.maneuvers if m not in self.completed_maneuvers]
+                if not available:
+                    return None  # All maneuvers completed
         else:
             available = self.maneuvers
         
@@ -565,7 +576,16 @@ class ChairFlying:
     def show_remaining_count(self):
         """Display remaining maneuvers count in fixed-length mode."""
         if self.session_mode == 'fixed':
-            remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+            # For random emergencies mode, only count non-emergency maneuvers
+            if self.emergency_mode == 'random':
+                # Count non-emergency maneuvers that haven't been completed
+                non_emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() != "emergency"]
+                non_emergency_completed = [m for m in self.completed_maneuvers if m.get("type", "").lower() != "emergency"]
+                remaining = len(non_emergency_maneuvers) - len(non_emergency_completed)
+            else:
+                # For all emergencies mode or no emergencies, count all maneuvers
+                remaining = len(self.maneuvers) - len(self.completed_maneuvers)
+            
             if remaining > 0:
                 print(f"({remaining} maneuver(s) remaining)")
     
