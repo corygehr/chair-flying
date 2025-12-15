@@ -391,8 +391,10 @@ class ChairFlying:
                 non_emergency_completed = [m for m in self.completed_maneuvers if m.get("type", "").lower() != "emergency"]
                 if len(non_emergency_completed) >= len(non_emergency_maneuvers):
                     return None  # All required maneuvers completed
-                # Available pool includes all maneuvers for selection
-                available = self.maneuvers
+                # Available pool includes only non-completed non-emergency maneuvers plus all emergencies
+                non_emergency_available = [m for m in non_emergency_maneuvers if m not in self.completed_maneuvers]
+                emergency_maneuvers = [m for m in self.maneuvers if m.get("type", "").lower() == "emergency"]
+                available = non_emergency_available + emergency_maneuvers
             else:
                 # For all emergencies mode, check if all maneuvers are completed
                 available = [m for m in self.maneuvers if m not in self.completed_maneuvers]
