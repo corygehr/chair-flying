@@ -576,9 +576,13 @@ class TestChairFlying(unittest.TestCase):
             
             # Select maneuvers one by one and verify no repeats
             selected_non_emergency = []
-            for i in range(3):  # Should be able to select 3 unique non-emergency maneuvers
+            attempts = 0
+            max_attempts = 100  # Safety limit to prevent infinite loop in case of bugs
+            
+            while len(selected_non_emergency) < 3 and attempts < max_attempts:
+                attempts += 1
                 maneuver = app.select_maneuver()
-                self.assertIsNotNone(maneuver, f"Should have a maneuver at iteration {i}")
+                self.assertIsNotNone(maneuver, f"Should have a maneuver at attempt {attempts}")
                 
                 if maneuver.get("type", "").lower() != "emergency":
                     # Verify this non-emergency maneuver hasn't been selected before
@@ -586,10 +590,10 @@ class TestChairFlying(unittest.TestCase):
                                    f"Maneuver {maneuver['name']} was selected twice!")
                     selected_non_emergency.append(maneuver)
                     app.completed_maneuvers.append(maneuver)
-                else:
-                    # If we got an emergency, don't mark it as completed
-                    # and try again (emergencies can repeat in random mode)
-                    i -= 1
+                # If we got an emergency, continue to next iteration without marking as completed
+            
+            # Verify we successfully selected all 3 unique non-emergency maneuvers
+            self.assertEqual(len(selected_non_emergency), 3, "Should have selected 3 unique non-emergency maneuvers")
             
             # After all non-emergency maneuvers are completed, session should end
             # even if we keep getting emergencies
