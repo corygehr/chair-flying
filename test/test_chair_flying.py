@@ -542,6 +542,66 @@ class TestChairFlying(unittest.TestCase):
         finally:
             os.unlink(temp_maneuvers.name)
             os.unlink(temp_config.name)
+    
+    def test_select_maneuver_fixed_random_no_repeats(self):
+        """Test that maneuvers don't repeat in fixed-length session with random emergencies."""
+        # Create a setup with multiple commercial and emergency maneuvers
+        temp_maneuvers = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        maneuvers = [
+            {"name": "Chandelles", "type": "maneuver", "kind": "commercial"},
+            {"name": "Lazy Eights", "type": "maneuver", "kind": "commercial"},
+            {"name": "Steep Turns", "type": "maneuver", "kind": "commercial"},
+            {"name": "Engine Failure", "type": "emergency"},
+            {"name": "Electrical Fire", "type": "emergency"},
+        ]
+        json.dump(maneuvers, temp_maneuvers)
+        temp_maneuvers.close()
+        
+        temp_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json')
+        config_data = {
+            "maneuvers_file": temp_maneuvers.name,
+            "interval_min_sec": 5,
+            "interval_max_sec": 20
+        }
+        json.dump(config_data, temp_config)
+        temp_config.close()
+        
+        try:
+            app = ChairFlying(temp_config.name)
+            app.session_mode = 'fixed'
+            app.maneuver_kind = 'commercial'
+            app.include_emergencies = True
+            app.emergency_mode = 'random'
+            app.filter_maneuvers()
+            
+            # Select maneuvers one by one and verify no repeats
+            selected_non_emergency = []
+            for i in range(3):  # Should be able to select 3 unique non-emergency maneuvers
+                maneuver = app.select_maneuver()
+                self.assertIsNotNone(maneuver, f"Should have a maneuver at iteration {i}")
+                
+                if maneuver.get("type", "").lower() != "emergency":
+                    # Verify this non-emergency maneuver hasn't been selected before
+                    self.assertNotIn(maneuver, selected_non_emergency, 
+                                   f"Maneuver {maneuver['name']} was selected twice!")
+                    selected_non_emergency.append(maneuver)
+                    app.completed_maneuvers.append(maneuver)
+                else:
+                    # If we got an emergency, don't mark it as completed
+                    # and try again (emergencies can repeat in random mode)
+                    i -= 1
+            
+            # After all non-emergency maneuvers are completed, session should end
+            # even if we keep getting emergencies
+            for m in app.maneuvers:
+                if m.get("type", "").lower() != "emergency" and m not in app.completed_maneuvers:
+                    app.completed_maneuvers.append(m)
+            
+            result = app.select_maneuver()
+            self.assertIsNone(result, "Session should be complete when all non-emergency maneuvers are done")
+        finally:
+            os.unlink(temp_maneuvers.name)
+            os.unlink(temp_config.name)
 
 
 if __name__ == "__main__":
