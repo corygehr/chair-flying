@@ -574,12 +574,16 @@ class TestChairFlying(unittest.TestCase):
             app.emergency_mode = 'random'
             app.filter_maneuvers()
             
+            # Calculate expected number of non-emergency maneuvers
+            expected_non_emergency_count = len([m for m in maneuvers if m.get('type', '').lower() != 'emergency'])
+            
             # Select maneuvers one by one and verify no repeats
             selected_non_emergency = []
             attempts = 0
-            max_attempts = 100  # Safety limit to prevent infinite loop in case of bugs
+            # Max attempts = expected count * 10 to allow for random emergencies while detecting bugs
+            max_attempts = expected_non_emergency_count * 10
             
-            while len(selected_non_emergency) < 3 and attempts < max_attempts:
+            while len(selected_non_emergency) < expected_non_emergency_count and attempts < max_attempts:
                 attempts += 1
                 maneuver = app.select_maneuver()
                 self.assertIsNotNone(maneuver, f"Should have a maneuver at attempt {attempts}")
@@ -592,8 +596,9 @@ class TestChairFlying(unittest.TestCase):
                     app.completed_maneuvers.append(maneuver)
                 # If we got an emergency, continue to next iteration without marking as completed
             
-            # Verify we successfully selected all 3 unique non-emergency maneuvers
-            self.assertEqual(len(selected_non_emergency), 3, "Should have selected 3 unique non-emergency maneuvers")
+            # Verify we successfully selected all unique non-emergency maneuvers
+            self.assertEqual(len(selected_non_emergency), expected_non_emergency_count, 
+                           f"Should have selected {expected_non_emergency_count} unique non-emergency maneuvers")
             
             # After all non-emergency maneuvers are completed, session should end
             # even if we keep getting emergencies
